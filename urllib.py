@@ -1,4 +1,5 @@
 #%%
+import re
 from urllib.request import urlopen
 html = urlopen(
     "http://localhost:8888/tree"
@@ -6,7 +7,11 @@ html = urlopen(
 print(html)
 
 #%%
-import re
 title = re.findall(r"<head>(.*?)</head>", html, flags=re.DOTALL)
 print(title)
+
+#%%
+ref = re.findall(r'href="(.*?)"', html)
+print(ref)
+
 #%%
