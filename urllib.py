@@ -1,5 +1,6 @@
 #%%
 import re
+from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen
 html = urlopen(
     "http://localhost:8888/tree"
