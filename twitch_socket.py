@@ -1,4 +1,5 @@
 import socket
+import datetime
 
 config = {
     "server": "irc.chat.twitch.tv",
@@ -17,15 +18,19 @@ sock.send(f'JOIN {config["channel"]}\r\n'.encode("utf-8"))
 
 try:
     i = 0
-    while i < 999:
+    while i < 99:
         resp = sock.recv(2048).decode("utf-8")
         if resp.startswith("PING"):
             print("PING:", resp)
         else:
-            print("Received:", repr(resp))
+            now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            with open("twitch_chat_log", 'a') as f:
+                f.write(str(now))
+                f.write(str(resp))
         i += 1
 except Exception:
     print("Error")
 finally:
+    f.close()
     sock.close()
 
