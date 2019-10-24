@@ -7,7 +7,7 @@ config = {
     "port": 6667,
     "nickname": "renaissancevector",
     "token": "oauth:j4c2ruphbc7v5v3eyhlt12lp1blipy",
-    "channel": "#nickmercs"
+    "channel": "#summit1g"
 }
 
 sock = socket.socket()
@@ -34,7 +34,7 @@ try:
             for respSingle in respList:
                 if respSingle.startswith(":" + config["nickname"]):
                     continue
-                infoList = respSingle.split(config["channel"])
+                infoList = respSingle.split("PRIVMSG " + config["channel"])
                 usernameInfoList = infoList[0].split(":")
                 if len(usernameInfoList) >= 2:
                     username_search = re.search(r"(.*)!.*@(.*) ", usernameInfoList[1], re.IGNORECASE)
@@ -44,11 +44,11 @@ try:
                 if len(infoList) >= 2:
                     comment = infoList[1].split(":")[1]
                 with open("twitch_chat_log_191024.log", 'a+') as f:
-                    f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "\t")
-                    f.write(username, "\t", comment, "\n")
+                    nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    f.write("%s\t%s\t%s\n" % (nowTime, username, comment))
 
 except Exception as e:
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), " Error:", e)
 finally:
-    f.close()
     sock.close()
+    f.close()
