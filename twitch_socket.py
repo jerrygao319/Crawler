@@ -35,7 +35,7 @@ try:
             for respSingle in respList:
                 if respSingle.startswith(":" + config["nickname"]):
                     continue
-                regex = r":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG ##([^:]*) :(.*)"
+                regex = r":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG #([^:]*) :(.*)"
                 username, channel, comment = re.search(regex, respSingle, re.IGNORECASE).groups()
                 with open("twitch_chat_log_191024.log", 'a+') as f:
                     nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
