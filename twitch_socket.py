@@ -7,7 +7,7 @@ config = {
     "port": 6667,
     "nickname": "renaissancevector",
     "token": "oauth:j4c2ruphbc7v5v3eyhlt12lp1blipy",
-    "channel": "#summit1g"
+    "channel": "#starcraft"
 }
 
 sock = socket.socket()
@@ -19,6 +19,7 @@ sock.send(f'JOIN {config["channel"]}\r\n'.encode("utf-8"))
 
 username = ""
 comment = ""
+channel = ""
 try:
     while True:
         resp = sock.recv(2048).decode("utf-8")
@@ -34,18 +35,11 @@ try:
             for respSingle in respList:
                 if respSingle.startswith(":" + config["nickname"]):
                     continue
-                infoList = respSingle.split("PRIVMSG " + config["channel"])
-                usernameInfoList = infoList[0].split(":")
-                if len(usernameInfoList) >= 2:
-                    username_search = re.search(r"(.*)!.*@(.*) ", usernameInfoList[1], re.IGNORECASE)
-                    if username_search:
-                        username = username_search.group(1)
-                        userURL = username_search.group(2)
-                if len(infoList) >= 2:
-                    comment = infoList[1].split(":")[1]
+                regex = r":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG ##([^:]*) :(.*)"
+                username, channel, comment = re.search(regex, respSingle, re.IGNORECASE).groups()
                 with open("twitch_chat_log_191024.log", 'a+') as f:
                     nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    f.write("%s\t%s\t%s\n" % (nowTime, username, comment))
+                    f.write("%s\t%s\t%s\t%s\n" % (nowTime, channel, username, comment))
 
 except Exception as e:
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), " Error:", e)
