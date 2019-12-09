@@ -93,7 +93,8 @@ def main_process(args):
 
             while tweet_count < max_tweets:
                 try:
-                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), tweet_mode="extended")
+                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
+                                        tweet_mode="extended")
                     if not tweets:
                         logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
                         break
