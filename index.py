@@ -25,7 +25,8 @@ class Tweet(object):
         self.in_reply_to_user_id = tweet_object_json.in_reply_to_user_id if hasattr(tweet_object_json,
                                                                                     "in_reply_to_user_id") and tweet_object_json.in_reply_to_user_id else None
         self.user = tweet_object_json.user.id_str if tweet_object_json.user else None
-        self.username = tweet_object_json.user.name if tweet_object_json.user else None
+        self.name = tweet_object_json.user.name if tweet_object_json.user else None
+        self.username = tweet_object_json.user.screen_name if tweet_object_json.user else None
         self.coordinates = tweet_object_json.coordinates if tweet_object_json.coordinates else None
         self.place = tweet_object_json.place.full_name + ", " + tweet_object_json.place.country if hasattr(
             tweet_object_json, "place") and tweet_object_json.place else None
@@ -35,8 +36,6 @@ class Tweet(object):
                                                                       "quoted_count") and tweet_object_json.quoted_count else None
         self.retweet_count = tweet_object_json.retweet_count if hasattr(tweet_object_json,
                                                                         "retweet_count") and tweet_object_json.retweet_count else None
-        self.reply_count = tweet_object_json.reply_count if hasattr(tweet_object_json,
-                                                                    "reply_count") and tweet_object_json.reply_count else None
         self.favorite_count = tweet_object_json.favorite_count if hasattr(tweet_object_json,
                                                                           "favorite_count") and tweet_object_json.favorite_count else None
         self.entities = tweet_object_json.entities if tweet_object_json.entities else None
@@ -81,29 +80,28 @@ def main_process(args):
     api = tweepy.API(auth)
 
     max_tweets = raw_cfg.getint("Parameters", "max_number")
-    searched_tweets = []
     last_id = -1
     rate_limit_window = raw_cfg.getint("Parameters", "rate_limit_window")
     file_path = raw_cfg.get("Parameters", "file_path")
     tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
+    tweet_count = 0
 
     try:
         with open(file_path + "tweets_" + lang + "_" + now_date + ".csv", "a+", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 
-            while len(searched_tweets) < max_tweets:
+            while tweet_count < max_tweets:
                 try:
-                    tweets = api.search(q=keywords, lang=lang, count=count, since_id=last_id, tweet_mode="extended")
+                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), tweet_mode="extended")
                     if not tweets:
                         logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
                         break
-                    searched_tweets.append(tweets)
                     last_id = tweets[-1].id
+                    tweet_count += len(tweets)
                 except tweepy.RateLimitError:
                     logger.debug("Rate Limited!")
                     time.sleep(rate_limit_window * 60)
-                    searched_tweets = []
 
                 except tweepy.TweepError as te:
                     logger.exception(te)
