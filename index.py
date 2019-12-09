@@ -10,64 +10,55 @@ from configparser import RawConfigParser
 
 class Tweet(object):
     def __init__(self, tweet_object_json):
-        self.created_at = tweet_object_json['created_at']
-        self.id = tweet_object_json['id']
-        self.id_str = tweet_object_json['id_str']
-        self.text = tweet_object_json['text']
+        self.created_at = tweet_object_json.created_at
+        self.id = tweet_object_json.id
+        self.id_str = tweet_object_json.id_str
+        self.text = tweet_object_json.full_text if hasattr(tweet_object_json,
+                                                           "full_text") and tweet_object_json.full_text else tweet_object_json.text
 
-        self.source = tweet_object_json['source'] if 'source' in tweet_object_json else None
-
-        self.truncated = tweet_object_json['truncated'] if 'truncated' in tweet_object_json else False
-
-        self.in_reply_to_status_id = tweet_object_json[
-            'in_relpy_to_status_id'] if 'in_relpy_to_status_id' in tweet_object_json else False
-
-        self.in_reply_to_status_id_string = tweet_object_json[
-            'in_relpy_to_status_id_string'] if 'in_relpy_to_status_id_string' in tweet_object_json else None
-
-        self.in_reply_to_user_id = tweet_object_json[
-            'in_relpy_to_user_id'] if 'in_relpy_to_user_id' in tweet_object_json else None
-
-        self.in_reply_to_screen_name = tweet_object_json[
-            'in_relpy_to_screen_name'] if 'in_relpy_to_screen_name' in tweet_object_json else None
-
-        self.user = tweet_object_json['user']['id_str'] if 'user' in tweet_object_json else None
-
-        self.coordinates = tweet_object_json['coordinates'] if 'coordinates' in tweet_object_json else None
-
-        self.place = tweet_object_json['place'] if 'place' in tweet_object_json else None
-
-        self.quoted_status_str = tweet_object_json[
-            'quoted_status_id_str'] if 'is_quoted_status' in tweet_object_json else None
-
-        self.retweeted_status = tweet_object_json[
-            'retweeted_status'] if "retweeted_status" in tweet_object_json else False
-
-        self.quoted_count = tweet_object_json['quoted_count'] if 'quoted_count' in tweet_object_json else None
-
-        self.retweet_count = tweet_object_json['retweet_count'] if 'retweet_count' in tweet_object_json else None
-
-        self.reply_count = tweet_object_json['reply_count'] if 'reply_count' in tweet_object_json else None
-
-        self.favorite_count = tweet_object_json['favorite_count'] if 'favorite_count' in tweet_object_json else None
-
-        self.entities = tweet_object_json['entities'] if 'entities' in tweet_object_json else None
+        self.source = tweet_object_json.source if tweet_object_json.source else None
+        self.truncated = tweet_object_json.truncated if tweet_object_json.truncated else False
+        self.in_reply_to_status_id = tweet_object_json.in_reply_to_status_id if hasattr(tweet_object_json,
+                                                                                        "in_reply_to_status_id") and tweet_object_json.in_reply_to_status_id else False
+        self.in_reply_to_status_id_str = tweet_object_json.in_reply_to_status_id_str if hasattr(tweet_object_json,
+                                                                                                "in_reply_to_status_id_str") and tweet_object_json.in_reply_to_status_id_str else None
+        self.in_reply_to_user_id = tweet_object_json.in_reply_to_user_id if hasattr(tweet_object_json,
+                                                                                    "in_reply_to_user_id") and tweet_object_json.in_reply_to_user_id else None
+        self.user = tweet_object_json.user.id_str if tweet_object_json.user else None
+        self.username = tweet_object_json.user.name if tweet_object_json.user else None
+        self.coordinates = tweet_object_json.coordinates if tweet_object_json.coordinates else None
+        self.place = tweet_object_json.place.full_name + ", " + tweet_object_json.place.country if hasattr(
+            tweet_object_json, "place") and tweet_object_json.place else None
+        self.quoted_status_id_str = tweet_object_json.quoted_status_id_str if hasattr(tweet_object_json,
+                                                                                      "is_quoted_status") and tweet_object_json.is_quoted_status else None
+        self.quoted_count = tweet_object_json.quoted_count if hasattr(tweet_object_json,
+                                                                      "quoted_count") and tweet_object_json.quoted_count else None
+        self.retweet_count = tweet_object_json.retweet_count if hasattr(tweet_object_json,
+                                                                        "retweet_count") and tweet_object_json.retweet_count else None
+        self.reply_count = tweet_object_json.reply_count if hasattr(tweet_object_json,
+                                                                    "reply_count") and tweet_object_json.reply_count else None
+        self.favorite_count = tweet_object_json.favorite_count if hasattr(tweet_object_json,
+                                                                          "favorite_count") and tweet_object_json.favorite_count else None
+        self.entities = tweet_object_json.entities if tweet_object_json.entities else None
 
         #        if "extended_entities" in tweet_object_json:
         #            self.extended_entities = tweet_object_json['extended_entities']
 
-        self.retweeted = tweet_object_json['retweeted'] if 'retweeted' in tweet_object_json else False
+        self.retweeted = tweet_object_json.retweeted if hasattr(tweet_object_json,
+                                                                "retweeted") and tweet_object_json.retweeted else False
+        self.possibly_sensitive = tweet_object_json.possibly_sensitive if hasattr(tweet_object_json,
+                                                                                  "possibly_sensitive") and tweet_object_json.possibly_sensitive else False
+        self.lang = tweet_object_json.lang if hasattr(tweet_object_json, "lang") and tweet_object_json.lang else None
 
-        self.possibly_sensitive = tweet_object_json[
-            'possibly_sensitive'] if 'possibly_sensitive' in tweet_object_json else False
 
-        self.lang = tweet_object_json['lang'] if 'lang' in tweet_object_json else None
-
-
-def save_to_file(tweet):
-    with open("tweets_" + now_date + ".csv", "a+") as f:
-        writer = csv.writer(f)
-        writer.writerow(tweet)
+def filter_attribute(tweet, tweet_attributes):
+    data = []
+    for attr in tweet_attributes:
+        if hasattr(tweet, attr):
+            data += [tweet.__getattribute__(attr)]
+        else:
+            data += "N/A"
+    return data
 
 
 def main_process(args):
@@ -82,35 +73,53 @@ def main_process(args):
     keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     # date_since = raw_cfg.defaults()["since"]
     count = raw_cfg.getint("Parameters", "count")
+    if not args.retweet:
+        keywords += " -filter:retweets"
 
     auth = tweepy.OAuthHandler(app_key, app_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
 
-    max_tweets = raw_cfg.getint("Parameters", "max")
+    max_tweets = raw_cfg.getint("Parameters", "max_number")
     searched_tweets = []
     last_id = -1
     rate_limit_window = raw_cfg.getint("Parameters", "rate_limit_window")
-    while len(searched_tweets) < max_tweets:
-        try:
-            tweets = api.search(q=keywords, lang=lang, count=count,max_id=str(last_id - 1))
-            if not tweets:
-                logger.error("NO tweet found. Language: " + lang + "Query: [" + keywords + "]")
-            searched_tweets.append(tweets)
-            last_id = tweets[-1].id
-        except tweepy.RateLimitError as rle:
-            logger.debug("Rate Limited!")
-            time.sleep(rate_limit_window * 60)
-            searched_tweets = []
-            last_id = -1
+    file_path = raw_cfg.get("Parameters", "file_path")
+    tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
 
-        except tweepy.TweepError as te:
-            logger.exception(te)
+    try:
+        with open(file_path + "tweets_" + lang + "_" + now_date + ".csv", "a+", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(tweet_attributes)
 
-        else:
-            for tweet in tweets:
-                if (not tweet.retweeted) and ('RT @' not in tweet.text):
-                    save_to_file(tweet)
+            while len(searched_tweets) < max_tweets:
+                try:
+                    tweets = api.search(q=keywords, lang=lang, count=count, since_id=last_id, tweet_mode="extended")
+                    if not tweets:
+                        logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
+                        break
+                    searched_tweets.append(tweets)
+                    last_id = tweets[-1].id
+                except tweepy.RateLimitError:
+                    logger.debug("Rate Limited!")
+                    time.sleep(rate_limit_window * 60)
+                    searched_tweets = []
+
+                except tweepy.TweepError as te:
+                    logger.exception(te)
+
+                else:
+                    for tweet in tweets:
+                        tweet_text = tweet.full_text if hasattr(tweet, "full_text") and tweet.full_text else tweet.text
+                        if (not tweet.retweeted) and ('RT @' not in tweet_text):
+                            tweet = Tweet(tweet)
+                            data = filter_attribute(tweet, tweet_attributes)
+                            writer.writerow(data)
+                    print("Write " + str(len(tweets)) + " tweets successful.")
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        f.close()
 
 
 if __name__ == "__main__":
@@ -123,8 +132,7 @@ if __name__ == "__main__":
     log_path = raw_cfg.get("Parameters", "log_path")
     os.makedirs(log_path, exist_ok=True)
     log_filename = log_path + "tweet_" + now_date + ".log"
-    logging.basicConfig(level=logging.DEBUG,
-                        format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
 
@@ -133,6 +141,8 @@ if __name__ == "__main__":
     # initial arguments parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--lang", type=str, default='en')
+    parser.add_argument("--retweet", type=bool, default=False,
+                        help="True from including retweets and False for excluding retweets")
     _args = parser.parse_args()
 
     main_process(_args)
