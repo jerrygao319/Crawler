@@ -130,7 +130,7 @@ def main_process(args):
 
 if __name__ == "__main__":
     # initial config parser
-    config_path = Path(__file__).parent.resolve() / 'config.ini'.encode("utf-8")
+    config_path = Path(__file__).parent.resolve() / 'config.ini'
     raw_cfg = ConfigParser()
     raw_cfg.read(config_path)
 
