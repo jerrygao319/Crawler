@@ -2,13 +2,13 @@
 source /etc/profile
 {
   echo  "$(date)" '-----Collection English ver. start....-----'
-  /usr/bin/sudo /usr/bin/python3 /home/gao/project/Crawler/index.py --lang en
+  /usr/bin/python3 /home/gao/project/Crawler/index.py --lang en
   echo "$(date)" '-----Collection English ver. finished!-----'
 } >> /home/gao/project/Crawler/log/bash.log
 sleep 3
 {
   echo "$(date)" '-----Collection Japanese ver. start....-----'
-  /usr/bin/sudo /usr/bin/python3 /home/gao/project/Crawler/index.py --lang ja
+  /usr/bin/python3 /home/gao/project/Crawler/index.py --lang ja
   echo "$(date)" '-----Collection Japanese ver. finished!-----'
 } >> /home/gao/project/Crawler/log/bash.log
 exit 0
