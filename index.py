@@ -134,7 +134,8 @@ if __name__ == "__main__":
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
-    log_path = raw_cfg.get("Parameters".encode("utf-8"), "log_path".encode("utf-8"))
+    print(raw_cfg.sections())
+    log_path = raw_cfg.get("Parameters", "log_path")
     os.makedirs(log_path, exist_ok=True)
     log_filename = log_path + "tweet_" + now_date + ".log"
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
