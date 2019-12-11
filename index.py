@@ -87,7 +87,7 @@ def main_process(args):
     tweet_count = 0
 
     try:
-        with open(file_path + "tweets_" + lang + "_" + now_date + ".csv", "a+", encoding="utf-8") as f:
+        with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "a+", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 

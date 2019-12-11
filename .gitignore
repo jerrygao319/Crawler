@@ -109,3 +109,6 @@ venv.bak/
 # PyCharm
 .idea
 
+.DS_Store
+file/
+naist_cookies.txt
