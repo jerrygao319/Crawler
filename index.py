@@ -6,6 +6,7 @@ import time
 import csv
 from datetime import datetime, timedelta
 from configparser import ConfigParser
+from pathlib import Path
 
 
 class Tweet(object):
@@ -129,8 +130,9 @@ def main_process(args):
 
 if __name__ == "__main__":
     # initial config parser
+    config_path = Path(__file__).parent.resolve() / 'config.ini'.encode("utf-8")
     raw_cfg = ConfigParser()
-    raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"))
+    raw_cfg.read(config_path)
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
