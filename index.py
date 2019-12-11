@@ -90,8 +90,7 @@ def main_process(args):
     tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
     tweet_count = 0
     total = 0
-    if not os.path.exists(file_path):
-        os.mkdir(file_path)
+    os.makedirs(file_path, 777, exist_ok=True)
 
     with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
         try:
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
     log_path = raw_cfg.get("Parameters", "log_path")
-    os.makedirs(log_path, exist_ok=True)
+    os.makedirs(log_path, 777, exist_ok=True)
     log_filename = log_path + "tweet_" + now_date + ".log"
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
