@@ -1,4 +1,5 @@
 #!/bin/bash
+source /etc/profile
 {
   echo  "$(date)" '-----Collection English ver. start....-----'
   python3 index.py --lang en
