@@ -75,7 +75,7 @@ def main_process(args):
     if hasattr(args, "range") and args.range:
         now_str = datetime.now().strftime("%Y-%m-%d")
         from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
-        keywords += u" since:" + from_date_str + u" until:" + now_str
+        keywords += " since:" + from_date_str + " until:" + now_str
     if not args.retweet:
         keywords += " -filter:retweets"
 
@@ -131,13 +131,13 @@ def main_process(args):
 if __name__ == "__main__":
     # initial config parser
     raw_cfg = RawConfigParser()
-    raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), u"", u"config.ini"))
+    raw_cfg.read("config.ini")
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
     log_path = raw_cfg.get("Parameters", "log_path")
     os.makedirs(log_path, exist_ok=True)
-    log_filename = log_path + u"tweet_" + now_date + u".log"
+    log_filename = log_path + "tweet_" + now_date + ".log"
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
