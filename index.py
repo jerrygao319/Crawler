@@ -90,6 +90,8 @@ def main_process(args):
     tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
     tweet_count = 0
     total = 0
+    if not os.path.exists(file_path):
+        os.mkdir(file_path)
 
     with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
         try:
