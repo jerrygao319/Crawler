@@ -5,7 +5,7 @@ import logging
 import time
 import csv
 from datetime import datetime, timedelta
-from configparser import RawConfigParser
+from configparser import ConfigParser
 
 
 class Tweet(object):
@@ -129,8 +129,8 @@ def main_process(args):
 
 if __name__ == "__main__":
     # initial config parser
-    raw_cfg = RawConfigParser()
-    raw_cfg.read("config.ini".encode("utf-8"))
+    raw_cfg = ConfigParser()
+    raw_cfg.read("./config.ini".encode("utf-8"))
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
