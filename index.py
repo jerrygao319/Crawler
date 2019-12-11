@@ -88,9 +88,10 @@ def main_process(args):
     file_path = raw_cfg.get("Parameters", "file_path")
     tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
     tweet_count = 0
+    total = 0
 
     try:
-        with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "a+", encoding="utf-8") as f:
+        with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 
@@ -117,7 +118,9 @@ def main_process(args):
                             tweet = Tweet(tweet)
                             data = filter_attribute(tweet, tweet_attributes)
                             writer.writerow(data)
-                    print("Write " + str(len(tweets)) + " tweets successful.")
+                            total += 1
+                    # print("Write " + str(len(tweets)) + " tweets successful.")
+            print("Total: " + str(total) + " <" + lang + "> tweets.")
     except Exception as e:
         logger.exception(e)
     finally:
