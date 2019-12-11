@@ -4,7 +4,7 @@ import argparse
 import logging
 import time
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from configparser import RawConfigParser
 
 
@@ -70,8 +70,11 @@ def main_process(args):
     # parameters
     lang = args.lang
     keywords = raw_cfg.get("Parameters", "keywords_" + lang)
-    # date_since = raw_cfg.defaults()["since"]
     count = raw_cfg.getint("Parameters", "count")
+    if hasattr(args, "range") and args.range:
+        now_str = datetime.now().strftime("%Y-%m-%d")
+        from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
+        keywords += " since:" + from_date_str + " until:" + now_str
     if not args.retweet:
         keywords += " -filter:retweets"
 
@@ -142,6 +145,8 @@ if __name__ == "__main__":
     parser.add_argument("--lang", type=str, default='en')
     parser.add_argument("--retweet", type=bool, default=False,
                         help="True from including retweets and False for excluding retweets")
+    parser.add_argument("--range", type=int, default=1,
+                        help="Date range. From (Today - Range) to Today")
     _args = parser.parse_args()
 
     main_process(_args)
