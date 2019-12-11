@@ -132,8 +132,8 @@ if __name__ == "__main__":
     # initial config parser
     config_path = Path(__file__).parent.resolve() / 'config.ini'
     raw_cfg = ConfigParser()
-    print(type(str(config_path)))
-    raw_cfg.read(str(config_path))
+    # print(type(str(config_path)))
+    raw_cfg.read(str(config_path), encoding="utf-8")
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
