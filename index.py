@@ -91,8 +91,8 @@ def main_process(args):
     tweet_count = 0
     total = 0
 
-    try:
-        with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
+    with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
+        try:
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 
@@ -122,17 +122,16 @@ def main_process(args):
                             total += 1
                     # print("Write " + str(len(tweets)) + " tweets successful.")
             print("Total: " + str(total) + " <" + lang + "> tweets.")
-    except Exception as e:
-        logger.exception(e)
-    finally:
-        f.close()
+        except Exception as e:
+            logger.exception(e)
+        finally:
+            f.close()
 
 
 if __name__ == "__main__":
     # initial config parser
     config_path = Path(__file__).parent.resolve() / 'config.ini'
     raw_cfg = ConfigParser()
-    # print(type(str(config_path)))
     raw_cfg.read(str(config_path), encoding="utf-8")
 
     # initial log
