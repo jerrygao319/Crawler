@@ -4,8 +4,10 @@ import argparse
 import logging
 import time
 import csv
+import sys
 from datetime import datetime, timedelta
 from configparser import RawConfigParser
+from importlib import reload
 
 
 class Tweet(object):
@@ -128,6 +130,11 @@ def main_process(args):
 
 
 if __name__ == "__main__":
+    default_encoding = 'utf-8'
+    if sys.getdefaultencoding() != default_encoding:
+        reload(sys)
+        sys.setdefaultencoding(default_encoding)
+
     # initial config parser
     raw_cfg = RawConfigParser()
     raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"))
