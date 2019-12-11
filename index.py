@@ -4,10 +4,9 @@ import argparse
 import logging
 import time
 import csv
-import sys
+import sys, codecs
 from datetime import datetime, timedelta
 from configparser import RawConfigParser
-from importlib import reload
 
 
 class Tweet(object):
@@ -130,10 +129,7 @@ def main_process(args):
 
 
 if __name__ == "__main__":
-    default_encoding = 'utf-8'
-    if sys.getdefaultencoding() != default_encoding:
-        reload(sys)
-        sys.setdefaultencoding(default_encoding)
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
 
     # initial config parser
     raw_cfg = RawConfigParser()
