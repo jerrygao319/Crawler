@@ -136,7 +136,6 @@ if __name__ == "__main__":
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
-    print(raw_cfg.sections())
     log_path = raw_cfg.get("Parameters", "log_path")
     os.makedirs(log_path, exist_ok=True)
     log_filename = log_path + "tweet_" + now_date + ".log"
