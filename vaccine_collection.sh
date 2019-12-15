@@ -9,7 +9,6 @@ sleep 3
 {
   echo "$(date)" '-----Collect Japanese ver. start....-----'
   /usr/bin/python3 /home/gao/project/Crawler/index.py --lang ja
-  echo "$(date)" '-----Collect Japanese ver. finished!-----'
-  echo -e "\n"
+  echo -e "$(date)" '-----Collect Japanese ver. finished!-----\n'
 } >> /home/gao/project/Crawler/log/bash.log
 exit 0
