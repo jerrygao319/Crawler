@@ -125,8 +125,6 @@ def main_process(args):
             print("Total: " + str(total) + " <" + lang + "> tweets.")
         except Exception as e:
             logger.exception(e)
-        finally:
-            f.close()
 
 
 if __name__ == "__main__":
