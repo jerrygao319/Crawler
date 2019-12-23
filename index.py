@@ -7,6 +7,7 @@ import csv
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 
+
 class Tweet(object):
     def __init__(self, tweet_object_json):
         self.created_at = tweet_object_json.created_at
