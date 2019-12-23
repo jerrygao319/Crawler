@@ -127,10 +127,8 @@ def main_process(args):
 
 if __name__ == "__main__":
     # initial config parser
-    #config_path = path(__file__).parent.resolve() / 'config.ini'
     raw_cfg = ConfigParser()
     raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"), encoding="utf-8")
-    #raw_cfg.read(str(config_path), encoding="utf-8")
 
     # initial log
     now_date = datetime.now().strftime('%y%m%d')
