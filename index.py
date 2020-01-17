@@ -68,7 +68,11 @@ def filter_attribute(tweet, tweet_attributes):
 
 
 def search_replies(tweet, api):
-    return api.get_status(tweet.in_reply_to_status_id_str, tweet_mode='extended')
+    try:
+        status = api.get_status(tweet.in_reply_to_status_id_str, tweet_mode='extended')
+        return status
+    except Exception as e:
+        return
 
 
 def main_process(args):
@@ -82,10 +86,10 @@ def main_process(args):
     lang = args.lang
     keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     count = raw_cfg.getint("Parameters", "count")
-    if hasattr(args, "range") and args.range:
-        now_str = datetime.now().strftime("%Y-%m-%d")
-        from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
-        keywords += " since:" + from_date_str + " until:" + now_str
+    now_str = datetime.now().strftime("%Y-%m-%d")
+    # if hasattr(args, "range") and args.range:
+    #     from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
+    #     keywords += " since:" + from_date_str + " until:" + now_str
     if not args.retweet:
         keywords += " -filter:retweets"
 
@@ -107,9 +111,9 @@ def main_process(args):
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 
-            while tweet_count < max_tweets:
+            while True:
                 try:
-                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
+                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), until=now_str,
                                         tweet_mode="extended")
                     if not tweets:
                         logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
