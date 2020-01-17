@@ -24,6 +24,10 @@ class Tweet(object):
                                                                                                 "in_reply_to_status_id_str") and tweet_object_json.in_reply_to_status_id_str else None
         self.in_reply_to_user_id = tweet_object_json.in_reply_to_user_id if hasattr(tweet_object_json,
                                                                                     "in_reply_to_user_id") and tweet_object_json.in_reply_to_user_id else None
+        self.in_reply_to_user_id_str = tweet_object_json.in_reply_to_user_id_str if hasattr(tweet_object_json,
+                                                                                    "in_reply_to_user_id_str") and tweet_object_json.in_reply_to_user_id_str else None
+        self.in_reply_to_screen_name = tweet_object_json.in_reply_to_screen_name if hasattr(tweet_object_json,
+                                                                                    "in_reply_to_screen_name") and tweet_object_json.in_reply_to_screen_name else None
         self.user = tweet_object_json.user.id_str if tweet_object_json.user else None
         self.name = tweet_object_json.user.name if tweet_object_json.user else None
         self.username = tweet_object_json.user.screen_name if tweet_object_json.user else None
@@ -50,14 +54,21 @@ class Tweet(object):
         self.lang = tweet_object_json.lang if hasattr(tweet_object_json, "lang") and tweet_object_json.lang else None
 
 
+def add_reply(tweet, reply):
+    if reply:
+        tweet.reply_text = reply.full_text if hasattr(reply, "full_text") and reply.full_text else reply.text
+
+
 def filter_attribute(tweet, tweet_attributes):
     data = []
     for attr in tweet_attributes:
         if hasattr(tweet, attr):
             data += [tweet.__getattribute__(attr)]
-        else:
-            data += "N/A"
     return data
+
+
+def search_replies(tweet, api):
+    return api.get_status(tweet.in_reply_to_status_id_str, tweet_mode='extended')
 
 
 def main_process(args):
@@ -117,6 +128,10 @@ def main_process(args):
                         tweet_text = tweet.full_text if hasattr(tweet, "full_text") and tweet.full_text else tweet.text
                         if (not tweet.retweeted) and ('RT @' not in tweet_text):
                             tweet = Tweet(tweet)
+                            # search for replies
+                            if tweet.in_reply_to_status_id and tweet.in_reply_to_user_id:
+                                replies_for = search_replies(tweet, api)
+                                add_reply(tweet, replies_for)
                             data = filter_attribute(tweet, tweet_attributes)
                             writer.writerow(data)
                             total += 1
