@@ -87,9 +87,9 @@ def main_process(args):
     keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     count = raw_cfg.getint("Parameters", "count")
     now_str = datetime.now().strftime("%Y-%m-%d")
-    # if hasattr(args, "range") and args.range:
-    #     from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
-    #     keywords += " since:" + from_date_str + " until:" + now_str
+    if not args.range:
+        from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
+        keywords += " since:" + from_date_str + " until:" + now_str
     if not args.retweet:
         keywords += " -filter:retweets"
 
