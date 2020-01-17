@@ -106,7 +106,8 @@ def main_process(args):
     total = 0
     os.makedirs(file_path, 777, exist_ok=True)
 
-    with open(file_path + "vaccine_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
+    output_file_name = raw_cfg.get("Parameters", "output_file")
+    with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
         try:
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
