@@ -88,7 +88,8 @@ def main_process(args):
     count = raw_cfg.getint("Parameters", "count")
     now_str = datetime.now().strftime("%Y-%m-%d")
     if not args.range:
-        from_date_str = (datetime.now() - timedelta(days=args.range)).strftime("%Y-%m-%d")
+        date_range = raw_cfg.getint("Parameters", "date_range")
+        from_date_str = (datetime.now() - timedelta(date_range)).strftime("%Y-%m-%d")
         keywords += " since:" + from_date_str + " until:" + now_str
     if not args.retweet:
         keywords += " -filter:retweets"
@@ -112,7 +113,7 @@ def main_process(args):
             writer = csv.writer(f)
             writer.writerow(tweet_attributes)
 
-            while True:
+            while tweet_count < max_tweets:
                 try:
                     if args.range:
                         tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), until=now_str,
