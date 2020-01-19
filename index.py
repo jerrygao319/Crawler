@@ -6,6 +6,7 @@ import time
 import csv
 from datetime import datetime, timedelta
 from configparser import ConfigParser
+import pymongo
 
 
 class Tweet(object):
@@ -25,9 +26,9 @@ class Tweet(object):
         self.in_reply_to_user_id = tweet_object_json.in_reply_to_user_id if hasattr(tweet_object_json,
                                                                                     "in_reply_to_user_id") and tweet_object_json.in_reply_to_user_id else None
         self.in_reply_to_user_id_str = tweet_object_json.in_reply_to_user_id_str if hasattr(tweet_object_json,
-                                                                                    "in_reply_to_user_id_str") and tweet_object_json.in_reply_to_user_id_str else None
+                                                                                            "in_reply_to_user_id_str") and tweet_object_json.in_reply_to_user_id_str else None
         self.in_reply_to_screen_name = tweet_object_json.in_reply_to_screen_name if hasattr(tweet_object_json,
-                                                                                    "in_reply_to_screen_name") and tweet_object_json.in_reply_to_screen_name else None
+                                                                                            "in_reply_to_screen_name") and tweet_object_json.in_reply_to_screen_name else None
         self.user = tweet_object_json.user.id_str if tweet_object_json.user else None
         self.name = tweet_object_json.user.name if tweet_object_json.user else None
         self.username = tweet_object_json.user.screen_name if tweet_object_json.user else None
@@ -71,8 +72,26 @@ def search_replies(tweet, api):
     try:
         status = api.get_status(tweet.in_reply_to_status_id_str, tweet_mode='extended')
         return status
-    except Exception as e:
+    except:
         return
+
+
+def init_mongodb():
+    global dao
+    server = raw_cfg.get("Database", "server")
+    port = raw_cfg.getint("Database", "port")
+    database = raw_cfg.get("Database", "database")
+    if dao is None:
+        client = pymongo.MongoClient(host=server, port=port)
+        dao = client[database]
+
+
+def insert_records(data, language):
+    try:
+        collection = dao[language]
+        return collection.insert_one(data)
+    except Exception as e:
+        logger.exception(e)
 
 
 def main_process(args):
@@ -108,6 +127,8 @@ def main_process(args):
     os.makedirs(file_path, 777, exist_ok=True)
 
     output_file_name = raw_cfg.get("Parameters", "output_file")
+    if output_file_name == 'pneumonia':
+        init_mongodb()
     with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
         try:
             writer = csv.writer(f)
@@ -117,7 +138,7 @@ def main_process(args):
                 try:
                     if args.range:
                         tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), until=now_str,
-                                        tweet_mode="extended")
+                                            tweet_mode="extended")
                     else:
                         tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
                                             tweet_mode="extended")
@@ -142,9 +163,15 @@ def main_process(args):
                             if tweet.in_reply_to_status_id and tweet.in_reply_to_user_id:
                                 replies_for = search_replies(tweet, api)
                                 add_reply(tweet, replies_for)
-                            data = filter_attribute(tweet, tweet_attributes)
-                            writer.writerow(data)
-                            total += 1
+                            if output_file_name == 'vaccine':
+                                data = filter_attribute(tweet, tweet_attributes)
+                                writer.writerow(data)
+                                total += 1
+                            elif output_file_name == 'pneumonia':
+                                tweet_dic = tweet.__dict__
+                                result = insert_records(tweet_dic, args.lang)
+                                if result:
+                                    total += 1
                     # print("Write " + str(len(tweets)) + " tweets successful.")
             print("Total: " + str(total) + " <" + lang + "> tweets.")
         except Exception as e:
@@ -176,4 +203,5 @@ if __name__ == "__main__":
                         help="Date range. From (Today - Range) to Today")
     _args = parser.parse_args()
 
+    dao = None
     main_process(_args)
