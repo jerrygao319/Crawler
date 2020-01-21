@@ -11,7 +11,7 @@ import pymongo
 
 class Tweet(object):
     def __init__(self, tweet_object_json):
-        self.created_at = tweet_object_json.created_at
+        self.created_at = tweet_object_json.created_at.strftime("%Y-%m-%d %H:%M:%S")
         self.id = tweet_object_json.id
         self.id_str = tweet_object_json.id_str
         self.text = tweet_object_json.full_text if hasattr(tweet_object_json,
@@ -72,6 +72,7 @@ def filter_attribute_to_dict(tweet, tweet_attributes):
     data = {}
     for attr in tweet_attributes:
         data[attr] = tweet.__getattribute__(attr) if hasattr(tweet, attr) else ""
+    data['crawled_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return data
 
 
