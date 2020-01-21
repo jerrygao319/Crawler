@@ -68,6 +68,13 @@ def filter_attribute(tweet, tweet_attributes):
     return data
 
 
+def filter_attribute_to_dict(tweet, tweet_attributes):
+    data = {}
+    for attr in tweet_attributes:
+        data[attr] = tweet.__getattribute__(attr) if hasattr(tweet, attr) else ""
+    return data
+
+
 def search_replies(tweet, api):
     try:
         status = api.get_status(tweet.in_reply_to_status_id_str, tweet_mode='extended')
@@ -168,8 +175,8 @@ def main_process(args):
                                 writer.writerow(data)
                                 total += 1
                             elif output_file_name == 'pneumonia':
-                                tweet_dic = tweet.__dict__
-                                result = insert_records(tweet_dic, args.lang)
+                                tweet_dict = filter_attribute_to_dict(tweet, tweet_attributes)
+                                result = insert_records(tweet_dict, args.lang)
                                 if result:
                                     total += 1
                     # print("Write " + str(len(tweets)) + " tweets successful.")
