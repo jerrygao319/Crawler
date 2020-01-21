@@ -95,7 +95,7 @@ def init_mongodb():
 
 def insert_records(data, language):
     try:
-        collection = dao[language]
+        collection = dao["twitter" + language]
         return collection.insert_one(data)
     except Exception as e:
         logger.exception(e)
