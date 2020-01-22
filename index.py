@@ -98,8 +98,9 @@ def insert_records(data, language):
     try:
         collection = dao["twitter_" + language]
         return collection.insert_one(data)
-    except Exception as e:
+    except pymongo.errors.DuplicateKeyError as e:
         logger.exception(e)
+        return
 
 
 def main_process(args):
