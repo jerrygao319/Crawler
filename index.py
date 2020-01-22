@@ -7,6 +7,7 @@ import csv
 from datetime import datetime, timedelta
 from configparser import ConfigParser
 import pymongo
+from pymongo.errors import DuplicateKeyError
 
 
 class Tweet(object):
@@ -98,7 +99,7 @@ def insert_records(data, language):
     try:
         collection = dao["twitter_" + language]
         return collection.insert_one(data)
-    except pymongo.errors.DuplicateKeyError as e:
+    except DuplicateKeyError as e:
         logger.exception(e)
         return
 
