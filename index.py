@@ -96,11 +96,14 @@ def init_mongodb():
 
 
 def insert_records(data, language):
+    collection = dao["twitter_" + language]
     try:
-        collection = dao["twitter_" + language]
+        print(data['id_str'])
         return collection.insert_one(data)
-    except DuplicateKeyError as e:
-        logger.exception(e)
+    except DuplicateKeyError:
+        if "_id" in data:
+            del data["_id"]
+        collection.update_one({'id_str': data['id_str']}, {'$set': data}, upsert=True)
         return
 
 
