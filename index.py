@@ -103,8 +103,7 @@ def insert_records(data, language):
     except DuplicateKeyError:
         if "_id" in data:
             del data["_id"]
-        collection.update_one({'id_str': data['id_str']}, {'$set': data}, upsert=True)
-        return
+        return collection.update_one({'id_str': data['id_str']}, {'$set': data}, upsert=True)
 
 
 def main_process(args):
