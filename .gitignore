@@ -114,3 +114,4 @@ file/
 naist_cookies.txt
 
 config.ini
+*.sh
