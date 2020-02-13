@@ -148,12 +148,8 @@ def main_process(args):
 
             while tweet_count < max_tweets:
                 try:
-                    if args.range:
-                        tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1), until=now_str,
-                                            tweet_mode="extended")
-                    else:
-                        tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
-                                            tweet_mode="extended")
+                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
+                                        tweet_mode="extended")
                     if not tweets:
                         logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
                         break
@@ -211,8 +207,7 @@ if __name__ == "__main__":
     parser.add_argument("--lang", type=str, default='en')
     parser.add_argument("--retweet", type=bool, default=False,
                         help="True from including retweets and False for excluding retweets")
-    parser.add_argument("--range", type=bool, default=False,
-                        help="Date range. From (Today - Range) to Today")
+    parser.add_argument("--range", type=bool, default=False)
     _args = parser.parse_args()
 
     dao = None
