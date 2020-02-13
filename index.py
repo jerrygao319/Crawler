@@ -98,7 +98,6 @@ def init_mongodb():
 def insert_records(data, language):
     collection = dao["twitter_" + language]
     try:
-        print(data['id_str'])
         return collection.insert_one(data)
     except DuplicateKeyError:
         if "_id" in data:
