@@ -112,3 +112,5 @@ venv.bak/
 .DS_Store
 file/
 naist_cookies.txt
+
+config.ini
