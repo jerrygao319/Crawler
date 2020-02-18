@@ -140,49 +140,52 @@ def main_process(args):
     output_file_name = raw_cfg.get("Parameters", "output_file")
     if output_file_name == 'pneumonia':
         init_mongodb()
-    with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "w+", encoding="utf-8") as f:
-        try:
-            writer = csv.writer(f)
-            writer.writerow(tweet_attributes)
+    if output_file_name == 'vaccine':
+        with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "w+",
+                  encoding="utf-8") as f:
+            csv.writer(f).writerow(tweet_attributes)
+    try:
+        while tweet_count < max_tweets:
+            try:
+                tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
+                                    tweet_mode="extended")
+                if not tweets:
+                    logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
+                    break
+                last_id = tweets[-1].id
+                tweet_count += len(tweets)
+            except tweepy.RateLimitError:
+                logger.debug("Rate Limited!")
+                time.sleep(rate_limit_window * 60)
 
-            while tweet_count < max_tweets:
-                try:
-                    tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
-                                        tweet_mode="extended")
-                    if not tweets:
-                        logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
-                        break
-                    last_id = tweets[-1].id
-                    tweet_count += len(tweets)
-                except tweepy.RateLimitError:
-                    logger.debug("Rate Limited!")
-                    time.sleep(rate_limit_window * 60)
+            except tweepy.TweepError as te:
+                logger.exception(te)
 
-                except tweepy.TweepError as te:
-                    logger.exception(te)
-
-                else:
-                    for tweet in tweets:
-                        tweet_text = tweet.full_text if hasattr(tweet, "full_text") and tweet.full_text else tweet.text
-                        if (not tweet.retweeted) and ('RT @' not in tweet_text):
-                            tweet = Tweet(tweet)
-                            # search for replies
-                            if tweet.in_reply_to_status_id and tweet.in_reply_to_user_id:
-                                replies_for = search_replies(tweet, api)
-                                add_reply(tweet, replies_for)
-                            if output_file_name == 'vaccine':
-                                data = filter_attribute(tweet, tweet_attributes)
+            else:
+                for tweet in tweets:
+                    tweet_text = tweet.full_text if hasattr(tweet, "full_text") and tweet.full_text else tweet.text
+                    if (not tweet.retweeted) and ('RT @' not in tweet_text):
+                        tweet = Tweet(tweet)
+                        # search for replies
+                        if tweet.in_reply_to_status_id and tweet.in_reply_to_user_id:
+                            replies_for = search_replies(tweet, api)
+                            add_reply(tweet, replies_for)
+                        if output_file_name == 'vaccine':
+                            data = filter_attribute(tweet, tweet_attributes)
+                            with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "a",
+                                      encoding="utf-8") as f:
+                                writer = csv.writer(f)
                                 writer.writerow(data)
+                            total += 1
+                        elif output_file_name == 'pneumonia':
+                            tweet_dict = filter_attribute_to_dict(tweet, tweet_attributes)
+                            result = insert_records(tweet_dict, args.lang)
+                            if result:
                                 total += 1
-                            elif output_file_name == 'pneumonia':
-                                tweet_dict = filter_attribute_to_dict(tweet, tweet_attributes)
-                                result = insert_records(tweet_dict, args.lang)
-                                if result:
-                                    total += 1
-                    # print("Write " + str(len(tweets)) + " tweets successful.")
-            print("Total: " + str(total) + " <" + lang + "> tweets.")
-        except Exception as e:
-            logger.exception(e)
+                # print("Write " + str(len(tweets)) + " tweets successful.")
+        print("Total: " + str(total) + " <" + lang + "> tweets.")
+    except Exception as e:
+        logger.exception(e)
 
 
 if __name__ == "__main__":
