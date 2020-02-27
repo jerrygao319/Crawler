@@ -1,12 +1,13 @@
-import tweepy
-import os
 import argparse
-import logging
-import time
 import csv
-from datetime import datetime, timedelta
+import logging
+import os
+import time
 from configparser import ConfigParser
+from datetime import datetime, timedelta
+
 import pymongo
+import tweepy
 from pymongo.errors import DuplicateKeyError
 
 
@@ -36,6 +37,9 @@ class Tweet(object):
         self.coordinates = tweet_object_json.coordinates if tweet_object_json.coordinates else None
         self.place = tweet_object_json.place.full_name + ", " + tweet_object_json.place.country if hasattr(
             tweet_object_json, "place") and tweet_object_json.place else None
+        self.is_quote_status = tweet_object_json.is_quote_status if hasattr(tweet_object_json, "is_quote_status") else None
+        self.quoted_status = tweet_object_json.quoted_status._json if hasattr(tweet_object_json, "quoted_status") and \
+                                                                tweet_object_json.quoted_status else None
         self.quoted_status_id_str = tweet_object_json.quoted_status_id_str if hasattr(tweet_object_json,
                                                                                       "is_quoted_status") and tweet_object_json.is_quoted_status else None
         self.quoted_count = tweet_object_json.quoted_count if hasattr(tweet_object_json,
@@ -72,7 +76,11 @@ def filter_attribute(tweet, tweet_attributes):
 def filter_attribute_to_dict(tweet, tweet_attributes):
     data = {}
     for attr in tweet_attributes:
-        data[attr] = tweet.__getattribute__(attr) if hasattr(tweet, attr) else ""
+        if "-" in attr:
+            attrs = attr.split("-")
+            data[attr] = str(tweet.__getattribute__(attrs[0])[attrs[1]]) if hasattr(tweet, attrs[0]) else ""
+        else:
+            data[attr] = tweet.__getattribute__(attr) if hasattr(tweet, attr) else ""
     data['crawled_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return data
 
