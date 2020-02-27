@@ -38,8 +38,11 @@ class Tweet(object):
         self.place = tweet_object_json.place.full_name + ", " + tweet_object_json.place.country if hasattr(
             tweet_object_json, "place") and tweet_object_json.place else None
         self.is_quote_status = tweet_object_json.is_quote_status if hasattr(tweet_object_json, "is_quote_status") else None
-        self.quoted_status = tweet_object_json.quoted_status._json if hasattr(tweet_object_json, "quoted_status") and \
-                                                                tweet_object_json.quoted_status else None
+        if hasattr(tweet_object_json, "quoted_status") and tweet_object_json.quoted_status:
+            quoted_status_tweet = tweet_object_json.quoted_status._json
+            self.quoted_status = quoted_status_tweet['full_text'] if 'full_text' in quoted_status_tweet else quoted_status_tweet['text']
+        else:
+            self.quoted_status = None
         self.quoted_status_id_str = tweet_object_json.quoted_status_id_str if hasattr(tweet_object_json,
                                                                                       "is_quoted_status") and tweet_object_json.is_quoted_status else None
         self.quoted_count = tweet_object_json.quoted_count if hasattr(tweet_object_json,
