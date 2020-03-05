@@ -226,4 +226,5 @@ if __name__ == "__main__":
     dao = None
     keywords_str = raw_cfg.get("Parameters", "keywords_" + _args.lang)
     for _keyword in map(str.strip, keywords_str.split("OR")):
-        main_process(_args, _keyword)
+        if _keyword:
+            main_process(_args, _keyword)
