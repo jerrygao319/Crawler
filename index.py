@@ -116,7 +116,7 @@ def insert_records(data, language):
         return collection.update_one({'id_str': data['id_str']}, {'$set': data}, upsert=True)
 
 
-def main_process(args):
+def main_process(args, keywords):
     # authentication info
     app_key = raw_cfg.get("Authentication", "app_key")
     app_secret = raw_cfg.get("Authentication", "app_secret")
@@ -125,7 +125,7 @@ def main_process(args):
 
     # parameters
     lang = args.lang
-    keywords = raw_cfg.get("Parameters", "keywords_" + lang)
+    # keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     count = raw_cfg.getint("Parameters", "count")
     now_str = datetime.now().strftime("%Y-%m-%d")
     if not args.range:
@@ -224,4 +224,6 @@ if __name__ == "__main__":
     _args = parser.parse_args()
 
     dao = None
-    main_process(_args)
+    keywords_str = raw_cfg.get("Parameters", "keywords_" + _args.lang)
+    for _keyword in map(str.strip, keywords_str.split("OR")):
+        main_process(_args, _keyword)
