@@ -129,10 +129,13 @@ def main_process(args, keywords):
     # keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     count = raw_cfg.getint("Parameters", "count")
     now_str = datetime.now().strftime("%Y-%m-%d")
-    if not args.range:
-        date_range = raw_cfg.getint("Parameters", "date_range")
-        from_date_str = (datetime.now() - timedelta(date_range)).strftime("%Y-%m-%d")
-        keywords += " since:" + from_date_str + " until:" + now_str
+    if not args.since and not args.until:
+        if not args.range:
+            date_range = raw_cfg.getint("Parameters", "date_range")
+            from_date_str = (datetime.now() - timedelta(date_range)).strftime("%Y-%m-%d")
+            keywords += f" since:{from_date_str} until:{now_str}"
+    else:
+        keywords += f" since:{args.since} until:{args.until}"
     if not args.retweet:
         keywords += " -filter:retweets"
 
@@ -153,8 +156,7 @@ def main_process(args, keywords):
     if output_file_name == 'pneumonia':
         init_mongodb()
     if output_file_name == 'vaccine':
-        with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "w+",
-                  encoding="utf-8") as f:
+        with open(f"{file_path}{output_file_name}_{lang}_{now_date}.csv", "w+", encoding="utf-8") as f:
             csv.writer(f).writerow(tweet_attributes)
     try:
         while tweet_count < max_tweets:
@@ -162,7 +164,7 @@ def main_process(args, keywords):
                 tweets = api.search(q=keywords, lang=lang, count=count, max_id=str(last_id - 1),
                                     tweet_mode="extended")
                 if not tweets:
-                    logger.error("NO tweet found. Language: " + lang + " and Query: [" + keywords + "]")
+                    logger.error(f"NO tweet found. Language: {lang} and Query: [{keywords}]")
                     break
                 last_id = tweets[-1].id
                 tweet_count += len(tweets)
@@ -184,7 +186,7 @@ def main_process(args, keywords):
                             add_reply(tweet, replies_for)
                         if output_file_name == 'vaccine':
                             data = filter_attribute(tweet, tweet_attributes)
-                            with open(file_path + output_file_name + "_" + lang + "_" + now_date + ".csv", "a",
+                            with open(f"{file_path}{output_file_name}_{lang}_{now_date}.csv", "a",
                                       encoding="utf-8") as f:
                                 writer = csv.writer(f)
                                 writer.writerow(data)
@@ -195,7 +197,7 @@ def main_process(args, keywords):
                             if result:
                                 total += 1
                 # print("Write " + str(len(tweets)) + " tweets successful.")
-        print("Total: " + str(total) + " <" + lang + "> tweets.")
+        print(f"Total: {str(total)} <{lang}> tweets")
     except Exception as e:
         logger.exception(e)
 
@@ -223,6 +225,10 @@ if __name__ == "__main__":
                         help="True from including retweets and False for excluding retweets")
     parser.add_argument("--range", type=bool, default=False)
     parser.add_argument("--index", type=int, default=1)
+    parser.add_argument("--since", type=str,
+                        help="format: 2020-01-08")
+    parser.add_argument("--until", type=str,
+                        help="format: 2020-01-15")
     _args = parser.parse_args()
 
     dao = None
