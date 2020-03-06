@@ -118,10 +118,11 @@ def insert_records(data, language):
 
 def main_process(args, keywords):
     # authentication info
-    app_key = raw_cfg.get("Authentication", "app_key")
-    app_secret = raw_cfg.get("Authentication", "app_secret")
-    access_token = raw_cfg.get("Authentication", "access_token")
-    access_token_secret = raw_cfg.get("Authentication", "access_token_secret")
+    api_index = args.index
+    app_key = raw_cfg.get(f"Authentication{api_index}", "app_key")
+    app_secret = raw_cfg.get(f"Authentication{api_index}", "app_secret")
+    access_token = raw_cfg.get(f"Authentication{api_index}", "access_token")
+    access_token_secret = raw_cfg.get(f"Authentication{api_index}", "access_token_secret")
 
     # parameters
     lang = args.lang
@@ -221,6 +222,7 @@ if __name__ == "__main__":
     parser.add_argument("--retweet", type=bool, default=False,
                         help="True from including retweets and False for excluding retweets")
     parser.add_argument("--range", type=bool, default=False)
+    parser.add_argument("--index", type=int, default=1)
     _args = parser.parse_args()
 
     dao = None
