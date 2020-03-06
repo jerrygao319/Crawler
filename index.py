@@ -222,7 +222,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--lang", type=str, default='en')
     parser.add_argument("--retweet", type=bool, default=False,
-                        help="True from including retweets and False for excluding retweets")
+                        help="True for including retweets and False for excluding retweets")
     parser.add_argument("--range", type=bool, default=False)
     parser.add_argument("--index", type=int, default=1)
     parser.add_argument("--since", type=str,
