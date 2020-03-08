@@ -119,6 +119,8 @@ def insert_records(data, language):
 def main_process(args, keywords):
     # authentication info
     api_index = args.index
+    if args.since and args.until:
+        api_index = api_index + 2
     app_key = raw_cfg.get(f"Authentication{api_index}", "app_key")
     app_secret = raw_cfg.get(f"Authentication{api_index}", "app_secret")
     access_token = raw_cfg.get(f"Authentication{api_index}", "access_token")
