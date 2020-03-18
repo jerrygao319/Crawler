@@ -29,11 +29,11 @@ tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username"
 
 def change_token():
     global api
-    if current_token == 1:
+    if current_token == 2:
         auth = tweepy.OAuthHandler(token_backup["app_key"], token_backup["app_secret"])
         auth.set_access_token(token_backup["access_token"], token_backup["access_token_secret"])
         api = tweepy.API(auth)
-    elif current_token == 2:
+    elif current_token == 1:
         auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
         auth.set_access_token(token["access_token"], token["access_token_secret"])
         api = tweepy.API(auth)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
-                        handlers=[logging.FileHandler("./log/get_id.log", encoding="utf-8")])
+                        handlers=[logging.FileHandler("./log/covid19_tweets.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
 
     current_token = 1
@@ -76,10 +76,10 @@ if __name__ == '__main__':
                             try:
                                 status = api.get_status(line, tweet_mode='extended')
                             except tweepy.RateLimitError:
-                                logger.error("Rate Limited!")
+                                logger.error("Rate Limited! Change token...")
                                 # time.sleep(15 * 60)
-                                api = change_token()
                                 current_token = 2 if current_token == 1 else 1
+                                api = change_token()
                                 try:
                                     status = api.get_status(line, tweet_mode='extended')
                                 except tweepy.RateLimitError:
