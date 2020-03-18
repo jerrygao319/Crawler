@@ -42,7 +42,7 @@ if __name__ == '__main__':
     files = sorted(os.listdir(file_path))
     while start_date <= end_date:
         now_date = datetime.strftime(start_date, "%Y-%m-%d")
-        with open(f"./files/convid19_tweets_{now_date}.csv", "w+", encoding="utf-8") as w:
+        with open(f"./covid19_tweets/convid19_tweets_{now_date}.csv", "w+", encoding="utf-8") as w:
             writer = csv.writer(w)
             writer.writerow(tweet_attributes)
             total = 0
