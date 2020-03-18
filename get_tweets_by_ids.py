@@ -5,13 +5,14 @@ import os
 import index
 import time
 import logging
+from datetime import datetime, timedelta
 from index import Tweet
 
 token = {
-    "app_key": "uagoLmOuTfI0HHa3xVQT9Jk5j",
-    "app_secret": "NDstogaWFIcnY6sj6bVCmP33cjr7MyClGEqyzJvQODz96f7wjl",
-    "access_token": "1014405726884642816-G9fqYuJBPWgVykd7MKDgYkrbnGC9DJ",
-    "access_token_secret": "R9VCK2SL7e7cELz0XwzDyTJtjdoDEK5pV2NIWErYtckml"
+    "app_key": "pxtScDDWdQWnAu8UVAuPc2HHL",
+    "app_secret": "Ipv3LCFO23veDVy8WyfcMcOSCeadjEcLVSVX0B4XTJhjqm78Ya",
+    "access_token": "1014405726884642816-F3UOrYtJoEQkpHLZFvKvAdl2fiavEN",
+    "access_token_secret": "o5FoeM9Tg72ZLrQG5HChRIgaAzAMpQBXvRrhFuz36eH37"
 }
 tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username", "name", "coordinates", "place",
                     "is_quote_status", "quoted_status", "retweet_count", "favorite_count", "possibly_sensitive", "lang",
@@ -20,6 +21,8 @@ tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username"
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default='./COVID-19-TweetIDs/2020-03/')
+    parser.add_argument("--start", type=str, default='2020-03-06')
+    parser.add_argument("--end", type=str, default='2020-03-12')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
@@ -32,29 +35,40 @@ if __name__ == '__main__':
     api = tweepy.API(auth)
 
     file_path = args.path
-    with open("convid19_tweets.csv", "w+", encoding="utf-8") as w:
-        writer = csv.writer(w)
-        writer.writerow(tweet_attributes)
-        for file in os.listdir(file_path):
+    start = args.start
+    end = args.end
+    start_date = datetime.strptime(start, "%Y-%m-%d")
+    end_date = datetime.strptime(end, "%Y-%m-%d")
+    files = sorted(os.listdir(file_path))
+    while start_date <= end_date:
+        now_date = datetime.strftime(start_date, "%Y-%m-%d")
+        with open(f"./files/convid19_tweets_{now_date}.csv", "w+", encoding="utf-8") as w:
+            writer = csv.writer(w)
+            writer.writerow(tweet_attributes)
             total = 0
-            with open(f"{file_path}/{file}", "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.endswith("\n"):
-                        line = line[:-1]
-                    try:
-                        status = api.get_status(line, tweet_mode='extended')
-                    except tweepy.RateLimitError:
-                        logger.error("Rate Limited!")
-                        time.sleep(15 * 60)
-                    except tweepy.TweepError as te:
-                        logger.error(f"get [{line}] error: {str(te)}")
-                    except Exception as e:
-                        logger.error(f"get {line} error: {str(e)}")
-                    tweet = Tweet(status)
-                    data = index.filter_attribute(tweet, tweet_attributes)
-                    writer.writerow(data)
-                    total += 1
-            logger.debug(f"{file} total: {total}")
+            for file in files:
+                if file.find(now_date) > -1:
+                    with open(f"{file_path}/{file}", "r", encoding="utf-8") as f:
+                        for line in f:
+                            if line.endswith("\n"):
+                                line = line[:-1]
+                            status = None
+                            try:
+                                status = api.get_status(line, tweet_mode='extended')
+                            except tweepy.RateLimitError:
+                                logger.error("Rate Limited!")
+                                time.sleep(15 * 60)
+                            except tweepy.TweepError as te:
+                                logger.error(f"get [{line}] error: {str(te)}")
+                            except Exception as e:
+                                logger.error(f"get {line} error: {str(e)}")
+
+                            tweet = Tweet(status)
+                            data = index.filter_attribute(tweet, tweet_attributes)
+                            writer.writerow(data)
+                            total += 1
+                    logger.debug(f"{file} total: {total}")
+        start_date = start_date + timedelta(days=1)
 
 
 
