@@ -76,7 +76,7 @@ if __name__ == '__main__':
                             try:
                                 status = api.get_status(line, tweet_mode='extended')
                             except tweepy.RateLimitError:
-                                logger.error("Rate Limited! Change token...")
+                                logger.error("Rate Limited! Changing token...")
                                 # time.sleep(15 * 60)
                                 current_token = 2 if current_token == 1 else 1
                                 api = change_token()
