@@ -21,7 +21,7 @@ tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username"
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default='./COVID-19-TweetIDs/2020-03/')
-    parser.add_argument("--start", type=str, default='2020-03-06')
+    parser.add_argument("--start", type=str, default='2020-03-05')
     parser.add_argument("--end", type=str, default='2020-03-12')
     args = parser.parse_args()
 
@@ -52,13 +52,13 @@ if __name__ == '__main__':
                         for line in f:
                             if line.endswith("\n"):
                                 line = line[:-1]
-                            status = None
                             try:
                                 status = api.get_status(line, tweet_mode='extended')
                             except tweepy.RateLimitError:
                                 logger.error("Rate Limited!")
                                 time.sleep(15 * 60)
                             except tweepy.TweepError as te:
+                                print(f"get [{line}] error: {str(te)}")
                                 logger.error(f"get [{line}] error: {str(te)}")
                             except Exception as e:
                                 logger.error(f"get {line} error: {str(e)}")
