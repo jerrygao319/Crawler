@@ -14,9 +14,31 @@ token = {
     "access_token": "1014405726884642816-F3UOrYtJoEQkpHLZFvKvAdl2fiavEN",
     "access_token_secret": "o5FoeM9Tg72ZLrQG5HChRIgaAzAMpQBXvRrhFuz36eH37"
 }
+
+token_backup = {
+    "app_key": "uagoLmOuTfI0HHa3xVQT9Jk5j",
+    "app_secret": "NDstogaWFIcnY6sj6bVCmP33cjr7MyClGEqyzJvQODz96f7wjl",
+    "access_token": "1014405726884642816-G9fqYuJBPWgVykd7MKDgYkrbnGC9DJ",
+    "access_token_secret": "R9VCK2SL7e7cELz0XwzDyTJtjdoDEK5pV2NIWErYtckml"
+}
+
 tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username", "name", "coordinates", "place",
                     "is_quote_status", "quoted_status", "retweet_count", "favorite_count", "possibly_sensitive", "lang",
                     "entities-urls", "in_reply_to_status_id_str", "in_reply_to_screen_name", "reply_text"]
+
+
+def change_token():
+    global api
+    if current_token == 1:
+        auth = tweepy.OAuthHandler(token_backup["app_key"], token_backup["app_secret"])
+        auth.set_access_token(token_backup["access_token"], token_backup["access_token_secret"])
+        api = tweepy.API(auth)
+    elif current_token == 2:
+        auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
+        auth.set_access_token(token["access_token"], token["access_token_secret"])
+        api = tweepy.API(auth)
+    return api
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -30,9 +52,8 @@ if __name__ == '__main__':
                         handlers=[logging.FileHandler("./log/get_id.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
 
-    auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
-    auth.set_access_token(token["access_token"], token["access_token_secret"])
-    api = tweepy.API(auth)
+    current_token = 1
+    api = change_token()
 
     file_path = args.path
     start = args.start
@@ -42,7 +63,7 @@ if __name__ == '__main__':
     files = sorted(os.listdir(file_path))
     while start_date <= end_date:
         now_date = datetime.strftime(start_date, "%Y-%m-%d")
-        with open(f"./covid19_tweets/convid19_tweets_{now_date}.csv", "w+", encoding="utf-8") as w:
+        with open(f"./covid19_tweet/convid19_tweets_{now_date}.csv", "w+", encoding="utf-8") as w:
             writer = csv.writer(w)
             writer.writerow(tweet_attributes)
             total = 0
@@ -56,7 +77,14 @@ if __name__ == '__main__':
                                 status = api.get_status(line, tweet_mode='extended')
                             except tweepy.RateLimitError:
                                 logger.error("Rate Limited!")
-                                time.sleep(15 * 60)
+                                # time.sleep(15 * 60)
+                                api = change_token()
+                                current_token = 2 if current_token == 1 else 1
+                                try:
+                                    status = api.get_status(line, tweet_mode='extended')
+                                except tweepy.RateLimitError:
+                                    logger.error("Rate Limited!")
+                                    time.sleep(15 * 60)
                             except tweepy.TweepError as te:
                                 print(f"get [{line}] error: {str(te)}")
                                 logger.error(f"get [{line}] error: {str(te)}")
