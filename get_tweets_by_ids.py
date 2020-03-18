@@ -86,7 +86,7 @@ if __name__ == '__main__':
                                     logger.error("Rate Limited!")
                                     time.sleep(15 * 60)
                             except tweepy.TweepError as te:
-                                print(f"get [{line}] error: {str(te)}")
+                                # print(f"get [{line}] error: {str(te)}")
                                 logger.error(f"get [{line}] error: {str(te)}")
                             except Exception as e:
                                 logger.error(f"get {line} error: {str(e)}")
