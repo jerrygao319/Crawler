@@ -4,6 +4,7 @@ import argparse
 import os
 import index
 import time
+import logging
 from index import Tweet
 
 token = {
@@ -20,6 +21,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default='./COVID-19-TweetIDs/2020-03/')
     args = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[logging.FileHandler("./log/get_id.log", encoding="utf-8")])
+    logger = logging.getLogger(__name__)
 
     auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
     auth.set_access_token(token["access_token"], token["access_token_secret"])
@@ -38,17 +44,17 @@ if __name__ == '__main__':
                     try:
                         status = api.get_status(line, tweet_mode='extended')
                     except tweepy.RateLimitError:
-                        print("Rate Limited!")
+                        logger.error("Rate Limited!")
                         time.sleep(15 * 60)
                     except tweepy.TweepError as te:
-                        print(f"get [{line}] error: {str(te)}")
+                        logger.error(f"get [{line}] error: {str(te)}")
                     except Exception as e:
-                        print(f"get {line} error: {str(e)}")
+                        logger.error(f"get {line} error: {str(e)}")
                     tweet = Tweet(status)
                     data = index.filter_attribute(tweet, tweet_attributes)
                     writer.writerow(data)
                     total += 1
-            print(f"{file} total: {total}")
+            logger.debug(f"{file} total: {total}")
 
 
 
