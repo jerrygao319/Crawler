@@ -71,8 +71,11 @@ def add_reply(tweet, reply):
 def filter_attribute(tweet, tweet_attributes):
     data = []
     for attr in tweet_attributes:
-        if hasattr(tweet, attr):
-            data += [tweet.__getattribute__(attr)]
+        if "-" in attr:
+            attrs = attr.split("-")
+            data.append(tweet.__getattribute__(attrs[0])[attrs[1]] if hasattr(tweet, attrs[0]) else "")
+        else:
+            data.append(tweet.__getattribute__(attr) if hasattr(tweet, attr) else "")
     return data
 
 
