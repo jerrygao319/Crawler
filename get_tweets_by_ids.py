@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
-                        handlers=[logging.FileHandler("./log/covid19_tweets.log", encoding="utf-8")])
+                        handlers=[logging.FileHandler("./log/covid19_tweetIDs.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
 
     current_token = 1
