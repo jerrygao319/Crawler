@@ -15,12 +15,21 @@ token = {
     "access_token_secret": "o5FoeM9Tg72ZLrQG5HChRIgaAzAMpQBXvRrhFuz36eH37"
 }
 
-token_backup = {
+token_2 = {
     "app_key": "uagoLmOuTfI0HHa3xVQT9Jk5j",
     "app_secret": "NDstogaWFIcnY6sj6bVCmP33cjr7MyClGEqyzJvQODz96f7wjl",
     "access_token": "1014405726884642816-G9fqYuJBPWgVykd7MKDgYkrbnGC9DJ",
     "access_token_secret": "R9VCK2SL7e7cELz0XwzDyTJtjdoDEK5pV2NIWErYtckml"
 }
+
+token_3 = {
+    "app_key": "dfnbCqWbhOrs18rkJez1xSSgd",
+    "app_secret": "Q32kNY2P4tXcvOwCQK0QJLgWtV7pTbinEadGU3MfFkJ0LuHFlp",
+    "access_token": "1014405726884642816-eNnraZyt7qvUXLKleFUSzyrD5rrr4G",
+    "access_token_secret": "SJ7ftpJFR0KjuVk84S6jPELPP0yh9iJ3tzrqXmP7zOP7s"
+}
+
+
 
 tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username", "name", "coordinates", "place",
                     "is_quote_status", "quoted_status", "retweet_count", "favorite_count", "possibly_sensitive", "lang",
@@ -29,11 +38,15 @@ tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username"
 
 def change_token():
     global api
-    if current_token == 2:
-        auth = tweepy.OAuthHandler(token_backup["app_key"], token_backup["app_secret"])
-        auth.set_access_token(token_backup["access_token"], token_backup["access_token_secret"])
+    if current_token == 1:
+        auth = tweepy.OAuthHandler(token_2["app_key"], token_2["app_secret"])
+        auth.set_access_token(token_2["access_token"], token_2["access_token_secret"])
         api = tweepy.API(auth)
-    elif current_token == 1:
+    elif current_token == 2:
+        auth = tweepy.OAuthHandler(token_3["app_key"], token_3["app_secret"])
+        auth.set_access_token(token_3["access_token"], token_3["access_token_secret"])
+        api = tweepy.API(auth)
+    elif current_token == 3:
         auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
         auth.set_access_token(token["access_token"], token["access_token_secret"])
         api = tweepy.API(auth)
@@ -78,13 +91,30 @@ if __name__ == '__main__':
                             except tweepy.RateLimitError:
                                 logger.error("Rate Limited! Changing token...")
                                 # time.sleep(15 * 60)
-                                current_token = 2 if current_token == 1 else 1
+                                if current_token == 1:
+                                    current_token = 2
+                                elif current_token == 2:
+                                    current_token = 3
+                                elif current_token == 3:
+                                    current_token = 1
                                 api = change_token()
                                 try:
                                     status = api.get_status(line, tweet_mode='extended')
                                 except tweepy.RateLimitError:
-                                    logger.error("Rate Limited!")
-                                    time.sleep(15 * 60)
+                                    logger.error("Rate Limited! Changing token...")
+                                    # time.sleep(15 * 60)
+                                    if current_token == 1:
+                                        current_token = 2
+                                    elif current_token == 2:
+                                        current_token = 3
+                                    elif current_token == 3:
+                                        current_token = 1
+                                    api = change_token()
+                                    try:
+                                        status = api.get_status(line, tweet_mode='extended')
+                                    except tweepy.RateLimitError:
+                                        logger.error("Rate Limited!")
+                                        time.sleep(15 * 60)
                             except tweepy.TweepError as te:
                                 # print(f"get [{line}] error: {str(te)}")
                                 logger.error(f"get [{line}] error: {str(te)}")
