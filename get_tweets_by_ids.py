@@ -9,11 +9,6 @@ from datetime import datetime, timedelta
 from index import Tweet
 from configparser import ConfigParser
 
-tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username", "name", "coordinates", "place",
-                    "is_quote_status", "quoted_status", "retweet_count", "favorite_count", "possibly_sensitive", "lang",
-                    "entities-urls", "in_reply_to_status_id_str", "in_reply_to_screen_name", "reply_text"]
-
-
 if __name__ == '__main__':
     raw_cfg = ConfigParser()
     raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"), encoding="utf-8")
@@ -38,6 +33,8 @@ if __name__ == '__main__':
     auth = tweepy.OAuthHandler(app_key, app_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
+
+    tweet_attributes = raw_cfg.get("Parameters", "tweet_attributes").split(",")
 
     file_path = args.path
     start = args.start
