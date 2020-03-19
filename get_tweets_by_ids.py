@@ -7,55 +7,22 @@ import time
 import logging
 from datetime import datetime, timedelta
 from index import Tweet
-
-token = {
-    "app_key": "pxtScDDWdQWnAu8UVAuPc2HHL",
-    "app_secret": "Ipv3LCFO23veDVy8WyfcMcOSCeadjEcLVSVX0B4XTJhjqm78Ya",
-    "access_token": "1014405726884642816-F3UOrYtJoEQkpHLZFvKvAdl2fiavEN",
-    "access_token_secret": "o5FoeM9Tg72ZLrQG5HChRIgaAzAMpQBXvRrhFuz36eH37"
-}
-
-token_2 = {
-    "app_key": "uagoLmOuTfI0HHa3xVQT9Jk5j",
-    "app_secret": "NDstogaWFIcnY6sj6bVCmP33cjr7MyClGEqyzJvQODz96f7wjl",
-    "access_token": "1014405726884642816-G9fqYuJBPWgVykd7MKDgYkrbnGC9DJ",
-    "access_token_secret": "R9VCK2SL7e7cELz0XwzDyTJtjdoDEK5pV2NIWErYtckml"
-}
-
-token_3 = {
-    "app_key": "dfnbCqWbhOrs18rkJez1xSSgd",
-    "app_secret": "Q32kNY2P4tXcvOwCQK0QJLgWtV7pTbinEadGU3MfFkJ0LuHFlp",
-    "access_token": "1014405726884642816-eNnraZyt7qvUXLKleFUSzyrD5rrr4G",
-    "access_token_secret": "SJ7ftpJFR0KjuVk84S6jPELPP0yh9iJ3tzrqXmP7zOP7s"
-}
+from configparser import ConfigParser
 
 tweet_attributes = ["created_at", "id_str", "text", "source", "user", "username", "name", "coordinates", "place",
                     "is_quote_status", "quoted_status", "retweet_count", "favorite_count", "possibly_sensitive", "lang",
                     "entities-urls", "in_reply_to_status_id_str", "in_reply_to_screen_name", "reply_text"]
 
 
-def change_token():
-    global api
-    if current_token == 1:
-        auth = tweepy.OAuthHandler(token_2["app_key"], token_2["app_secret"])
-        auth.set_access_token(token_2["access_token"], token_2["access_token_secret"])
-        api = tweepy.API(auth)
-    elif current_token == 2:
-        auth = tweepy.OAuthHandler(token_3["app_key"], token_3["app_secret"])
-        auth.set_access_token(token_3["access_token"], token_3["access_token_secret"])
-        api = tweepy.API(auth)
-    elif current_token == 3:
-        auth = tweepy.OAuthHandler(token["app_key"], token["app_secret"])
-        auth.set_access_token(token["access_token"], token["access_token_secret"])
-        api = tweepy.API(auth)
-    return api
-
-
 if __name__ == '__main__':
+    raw_cfg = ConfigParser()
+    raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"), encoding="utf-8")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default='./COVID-19-TweetIDs/2020-03/')
     parser.add_argument("--start", type=str, default='2020-03-05')
     parser.add_argument("--end", type=str, default='2020-03-12')
+    parser.add_argument("--index", type=int, default=3)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
@@ -63,8 +30,14 @@ if __name__ == '__main__':
                         handlers=[logging.FileHandler("./log/covid19_tweetIDs.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
 
-    current_token = 1
-    api = change_token()
+    app_key = raw_cfg.get(f"Authentication{args.index}", "app_key")
+    app_secret = raw_cfg.get(f"Authentication{args.index}", "app_secret")
+    access_token = raw_cfg.get(f"Authentication{args.index}", "access_token")
+    access_token_secret = raw_cfg.get(f"Authentication{args.index}", "access_token_secret")
+
+    auth = tweepy.OAuthHandler(app_key, app_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth)
 
     file_path = args.path
     start = args.start
@@ -105,50 +78,4 @@ if __name__ == '__main__':
                             miss_ids = list(set(ids) - set(get_ids))
                             if len(miss_ids) > 0:
                                 logger.error(f"cannot get {miss_ids} from [{file}] ")
-                        # for line in f:
-                        #     if line.endswith("\n"):
-                        #         line = line[:-1]
-                        #     try:
-                        #         status = api.get_status(line, tweet_mode='extended')
-                        #     except tweepy.RateLimitError:
-                        #         logger.error("Rate Limited! Changing token...")
-                        #         # time.sleep(15 * 60)
-                        #         if current_token == 1:
-                        #             current_token = 2
-                        #         elif current_token == 2:
-                        #             current_token = 3
-                        #         elif current_token == 3:
-                        #             current_token = 1
-                        #         api = change_token()
-                        #         try:
-                        #             status = api.get_status(line, tweet_mode='extended')
-                        #         except tweepy.RateLimitError:
-                        #             logger.error("Rate Limited! Changing token...")
-                        #             # time.sleep(15 * 60)
-                        #             if current_token == 1:
-                        #                 current_token = 2
-                        #             elif current_token == 2:
-                        #                 current_token = 3
-                        #             elif current_token == 3:
-                        #                 current_token = 1
-                        #             api = change_token()
-                        #             try:
-                        #                 status = api.get_status(line, tweet_mode='extended')
-                        #             except tweepy.RateLimitError:
-                        #                 logger.error("Rate Limited!")
-                        #                 time.sleep(15 * 60)
-                        #             except tweepy.TweepError as te:
-                        #                 logger.error(f"get [{line}] from [{file}] error: {str(te)}")
-                        #         except tweepy.TweepError as te:
-                        #             logger.error(f"get [{line}] from [{file}] error: {str(te)}")
-                        #     except tweepy.TweepError as te:
-                        #         # print(f"get [{line}] error: {str(te)}")
-                        #         logger.error(f"get [{line}] from [{file}] error: {str(te)}")
-                        #     except Exception as e:
-                        #         logger.error(f"get {line} from [{file}] error: {str(e)}")
-                        #
-                        #     tweet = Tweet(status)
-                        #     data = index.filter_attribute(tweet, tweet_attributes)
-                        #     writer.writerow(data)
-                        #     total += 1
         start_date = start_date + timedelta(days=1)
