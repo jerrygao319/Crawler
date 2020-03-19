@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument("--path", type=str, default='./COVID-19-TweetIDs/2020-03/')
     parser.add_argument("--start", type=str, default='2020-03-05')
     parser.add_argument("--end", type=str, default='2020-03-12')
-    parser.add_argument("--index", type=int, default=3)
+    parser.add_argument("--index", type=int, default=4)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
