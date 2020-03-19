@@ -81,7 +81,6 @@ if __name__ == '__main__':
             for file in files:
                 if file.find(now_date) > -1:
                     with open(f"{file_path}/{file}", "r", encoding="utf-8") as f:
-                        # tweet_ids = f.readlines()
                         tweet_ids = [line[:-1] if line.endswith("\n") else line for line in
                                      map(str.strip, f.readlines())]
                         tweets_count = len(tweet_ids)
@@ -105,7 +104,7 @@ if __name__ == '__main__':
                                 writer.writerow(data)
                             miss_ids = list(set(ids) - set(get_ids))
                             if len(miss_ids) > 0:
-                                logger.error(f"cannot get [{ids}] from [{file}] ")
+                                logger.error(f"cannot get {miss_ids} from [{file}] ")
                         # for line in f:
                         #     if line.endswith("\n"):
                         #         line = line[:-1]
