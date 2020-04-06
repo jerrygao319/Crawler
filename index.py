@@ -5,6 +5,7 @@ import os
 import time
 from configparser import ConfigParser
 from datetime import datetime, timedelta
+import daily_word_cloud as wordcloud
 
 import pymongo
 import tweepy
@@ -133,11 +134,10 @@ def main_process(args, keywords):
     lang = args.lang
     # keywords = raw_cfg.get("Parameters", "keywords_" + lang)
     count = raw_cfg.getint("Parameters", "count")
-    now_str = datetime.now().strftime("%Y-%m-%d")
+    now_str = current_date.strftime("%Y-%m-%d")
     if not args.since and not args.until:
         if not args.range:
-            date_range = raw_cfg.getint("Parameters", "date_range")
-            from_date_str = (datetime.now() - timedelta(date_range)).strftime("%Y-%m-%d")
+            from_date_str = previous_date.strftime("%Y-%m-%d")
             keywords += f" since:{from_date_str} until:{now_str}"
     else:
         keywords += f" since:{args.since} until:{args.until}"
@@ -207,22 +207,7 @@ def main_process(args, keywords):
         logger.exception(e)
 
 
-if __name__ == "__main__":
-    # initial config parser
-    raw_cfg = ConfigParser()
-    raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"), encoding="utf-8")
-
-    # initial log
-    now_date = datetime.now().strftime('%y%m%d')
-    log_path = raw_cfg.get("Parameters", "log_path")
-    os.makedirs(log_path, mode=0o755, exist_ok=True)
-    log_filename = log_path + "tweet_" + now_date + ".log"
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
-                        datefmt="%Y-%m-%d %H:%M:%S",
-                        handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
-
-    logger = logging.getLogger(__name__)
-
+def main():
     # initial arguments parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--lang", type=str, default='en')
@@ -234,10 +219,33 @@ if __name__ == "__main__":
                         help="format: 2020-01-08")
     parser.add_argument("--until", type=str,
                         help="format: 2020-01-15")
-    _args = parser.parse_args()
+    args = parser.parse_args()
 
+    keywords_str = raw_cfg.get("Parameters", "keywords_" + args.lang)
+    for keyword in map(str.strip, keywords_str.split("OR")):
+        if keyword:
+            main_process(args, keyword)
+    wordcloud.main(f"twitter_{args.lang}", current_date, previous_date)
+
+
+if __name__ == "__main__":
+    # initial config parser
+    raw_cfg = ConfigParser()
+    raw_cfg.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "", "config.ini"), encoding="utf-8")
+
+    # initial log
+    current_date = datetime.now()
+    previous_date = current_date - timedelta(raw_cfg.getint("Parameters", "date_range"))
+
+    now_date = current_date.strftime('%y%m%d')
+    log_path = raw_cfg.get("Parameters", "log_path")
+    os.makedirs(log_path, mode=0o755, exist_ok=True)
+    log_filename = log_path + "tweet_" + now_date + ".log"
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
+
+    logger = logging.getLogger(__name__)
     dao = None
-    keywords_str = raw_cfg.get("Parameters", "keywords_" + _args.lang)
-    for _keyword in map(str.strip, keywords_str.split("OR")):
-        if _keyword:
-            main_process(_args, _keyword)
+
+    main()
