@@ -5,7 +5,7 @@ import os
 import time
 from configparser import ConfigParser
 from datetime import datetime, timedelta
-import daily_word_cloud as wordcloud
+import daily_word_cloud
 
 import pymongo
 import tweepy
@@ -225,7 +225,7 @@ def main():
     for keyword in map(str.strip, keywords_str.split("OR")):
         if keyword:
             main_process(args, keyword)
-    wordcloud.main(f"twitter_{args.lang}", current_date, previous_date)
+    daily_word_cloud.main(f"twitter_{args.lang}", current_date, previous_date)
 
 
 if __name__ == "__main__":
