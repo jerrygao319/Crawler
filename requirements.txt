@@ -1,0 +1,8 @@
+scp
+wordcloud
+mecab-python3
+jieba
+paramiko
+tweepy
+pymongo
+configparser
