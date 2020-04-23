@@ -183,7 +183,7 @@ def main_process(args, keywords):
             else:
                 for tweet in tweets:
                     tweet_text = tweet.full_text if hasattr(tweet, "full_text") and tweet.full_text else tweet.text
-                    if (not tweet.retweeted) and ('RT @' not in tweet_text):
+                    if tweet_text:
                         tweet = Tweet(tweet)
                         # search for replies
                         if tweet.in_reply_to_status_id and tweet.in_reply_to_user_id:
