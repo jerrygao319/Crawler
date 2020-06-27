@@ -3,10 +3,15 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import csv
+import pymongo
+from datetime import datetime
 
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=option)
+
+client = pymongo.MongoClient()
+db = client['yahoo_news']
 
 
 def pagination_handler(pagination, t_content):
@@ -23,32 +28,37 @@ def pagination_handler(pagination, t_content):
     return t_content
 
 
-def comments_pagination(comment_soup):
+def comments_pagination(comment_soup, url, collection):
     comments = []
     comment_list = comment_soup.find_all(class_='commentListItem')
     for comment_item in comment_list:
-        comment = {}
+        _comments = {'news': url}
         if comment_item.has_attr('pos'):
+            _comments['comment_id'] = comment_item['id']
             comment_p = comment_item.find_all('span', {'class': 'cmtBody'})
             if comment_p:
-                comment['content'] = comment_p[0].get_text()
+                _comments['content'] = comment_p[0].get_text()
                 votes = comment_item.find_all('div', {'class': 'emotion_vote'})
                 for vote in votes:
                     option_ = vote.parent['class']
                     if option_ and (option_[0] == 'good' or option_[0] == 'bad'):
                         vote_num = vote.find_all('span', {'class': 'userNum'})[0].get_text()
-                        comment[option_[0]] = vote_num
-                comments.append(comment)
+                        _comments[option_[0]] = vote_num
+                # comments.append(_comments)
+                _comments['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                collection.update_one({'news': _comments['news'], 'comment_id': _comments['comment_id']},
+                                      {'$set': _comments}, upsert=True)
     return comments
 
 
-def comments_handler(comments):
+def comments_handler(comments, url):
+    collection = db['comments']
     comment_url = comments[0]['href']
     driver.get(comment_url)
     time.sleep(3)
     driver.switch_to.frame("news-cmt")
     comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-    comments = comments_pagination(comment_soup)
+    comments = comments_pagination(comment_soup, url, collection)
     while True:
         page_ul = comment_soup.find_all('ul', {'class': 'pagenation'})
         if page_ul:
@@ -59,14 +69,15 @@ def comments_handler(comments):
                 time.sleep(3)
                 driver.switch_to.frame("news-cmt")
                 comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                comments += comments_pagination(comment_soup)
+                comments += comments_pagination(comment_soup, url, collection)
             else:
                 break
-
-    return comments
+    # collection.insert_many(comments)
+    # return comments
 
 
 def main(news_soup):
+    collection = db['news']
     news_list = news_soup.find_all(class_='newsFeed_item')
     for news in news_list:
         news_title_div = news.find_all(class_='newsFeed_item_title')
@@ -96,15 +107,21 @@ def main(news_soup):
                         next_temp_content = ''
                         if pagination:
                             next_temp_content = pagination_handler(pagination, next_temp_content)
-                        if comments:
-                            result['comments'] = comments_handler(comments)
                         for part in contents:
                             temp_content += part.get_text()
                         temp_content += next_temp_content
-                        result['content'] = temp_content[2:] if temp_content.startswith('\u3000') else temp_content[1:]
-                        with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
-                            writer = csv.writer(f, delimiter="\t")
-                            writer.writerow([result['url'], result['title'], result['content'], result['comments']])
+                        result['content'] = temp_content
+                        result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
+                        result['created_at'] = time_p
+                        collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                        # _comments = {}
+                        if comments:
+                            # result['comments'] = comments_handler(comments)
+                            comments_handler(comments, result['url'])
+                        # with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
+                        #     writer = csv.writer(f, delimiter="\t")
+                        #     writer.writerow([result['url'], result['title'], result['content'], result['comments']])
                         # print(result)
 
 
