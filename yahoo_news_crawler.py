@@ -72,6 +72,8 @@ def comments_handler(comments, url):
                 comments += comments_pagination(comment_soup, url, collection)
             else:
                 break
+        else:
+            break
     # collection.insert_many(comments)
     # return comments
 
@@ -142,3 +144,5 @@ if __name__ == '__main__':
                 main(soup)
             else:
                 break
+        else:
+            break
