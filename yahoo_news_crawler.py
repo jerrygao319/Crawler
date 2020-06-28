@@ -44,10 +44,10 @@ def comments_pagination(comment_soup, url, collection):
                     if option_ and (option_[0] == 'good' or option_[0] == 'bad'):
                         vote_num = vote.find_all('span', {'class': 'userNum'})[0].get_text()
                         _comments[option_[0]] = vote_num
-                # comments.append(_comments)
                 _comments['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 collection.update_one({'news': _comments['news'], 'comment_id': _comments['comment_id']},
                                       {'$set': _comments}, upsert=True)
+                comments.append(_comments['content'])
     return comments
 
 
@@ -58,7 +58,7 @@ def comments_handler(comments, url):
     time.sleep(3)
     driver.switch_to.frame("news-cmt")
     comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-    comments = comments_pagination(comment_soup, url, collection)
+    _comments = comments_pagination(comment_soup, url, collection)
     while True:
         page_ul = comment_soup.find_all('ul', {'class': 'pagenation'})
         if page_ul:
@@ -69,13 +69,13 @@ def comments_handler(comments, url):
                 time.sleep(3)
                 driver.switch_to.frame("news-cmt")
                 comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                comments += comments_pagination(comment_soup, url, collection)
+                _comments += comments_pagination(comment_soup, url, collection)
             else:
                 break
         else:
             break
     # collection.insert_many(comments)
-    # return comments
+    return _comments
 
 
 def main(news_soup):
@@ -116,11 +116,11 @@ def main(news_soup):
                         result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
                         result['created_at'] = time_p
-                        collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                         # _comments = {}
                         if comments:
                             # result['comments'] = comments_handler(comments)
-                            comments_handler(comments, result['url'])
+                            result['comments'] = comments_handler(comments, result['url'])
+                        collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                         # with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
                         #     writer = csv.writer(f, delimiter="\t")
                         #     writer.writerow([result['url'], result['title'], result['content'], result['comments']])
