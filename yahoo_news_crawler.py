@@ -2,20 +2,19 @@ import requests
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
-import csv
 import pymongo
 from datetime import datetime
 import logging
 
 option = webdriver.ChromeOptions()
 option.add_argument("enable-automation")
-option.add_argument("--headless")
-option.add_argument("--no-sandbox")
-option.add_argument("--disable-extensions")
-option.add_argument("--dns-prefetch-disable")
-option.add_argument("--disable-gpu")
+option.add_argument("headless")
+option.add_argument("no-sandbox")
+option.add_argument("disable-extensions")
+option.add_argument("dns-prefetch-disable")
+option.add_argument("disable-gpu")
 
-driver = webdriver.Chrome(chrome_option=option)
+driver = webdriver.Chrome(chrome_options=option)
 driver.set_page_load_timeout(10)
 driver.set_script_timeout(10)
 
