@@ -10,6 +10,8 @@ import logging
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=option)
+driver.set_page_load_timeout(10)
+driver.set_script_timeout(10)
 
 client = pymongo.MongoClient()
 db = client['yahoo_news']
