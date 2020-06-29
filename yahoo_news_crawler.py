@@ -5,6 +5,7 @@ import time
 import csv
 import pymongo
 from datetime import datetime
+import logging
 
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
@@ -96,8 +97,6 @@ def main(news_soup):
                 driver.execute_script(js)
                 time.sleep(3)
                 detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                driver.switch_to.frame("news-cmt")
-                iframe = BeautifulSoup(driver.page_source, 'html.parser')
                 title = detail_soup.body.article.h1.get_text()
                 result['title'] = title
                 if title:
@@ -105,22 +104,28 @@ def main(news_soup):
                     if contents:
                         temp_content = ''
                         pagination = detail_soup.find_all(class_='pagination_items')
-                        comments = iframe.find_all('a', {'id': 'loadMoreComments'})
-                        next_temp_content = ''
-                        if pagination:
-                            next_temp_content = pagination_handler(pagination, next_temp_content)
-                        for part in contents:
-                            temp_content += part.get_text()
-                        temp_content += next_temp_content
-                        result['content'] = temp_content
-                        result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
-                        result['created_at'] = time_p
-                        # _comments = {}
-                        if comments:
-                            # result['comments'] = comments_handler(comments)
-                            result['comments'] = comments_handler(comments, result['url'])
-                        collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                        driver.switch_to.frame("news-cmt")
+                        try:
+                            iframe = BeautifulSoup(driver.page_source, 'html.parser')
+                            comments = iframe.find_all('a', {'id': 'loadMoreComments'})
+                            next_temp_content = ''
+                            if pagination:
+                                next_temp_content = pagination_handler(pagination, next_temp_content)
+                            for part in contents:
+                                temp_content += part.get_text()
+                            temp_content += next_temp_content
+                            result['content'] = temp_content
+                            result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
+                            result['created_at'] = time_p
+                            # _comments = {}
+                            if comments:
+                                # result['comments'] = comments_handler(comments)
+                                result['comments'] = comments_handler(comments, result['url'])
+                            collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                        except Exception as e1:
+                            logging.exception(result['url'], e1)
+
                         # with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
                         #     writer = csv.writer(f, delimiter="\t")
                         #     writer.writerow([result['url'], result['title'], result['content'], result['comments']])
@@ -128,21 +133,28 @@ def main(news_soup):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[logging.FileHandler("yahoo_news.log", encoding="utf-8")])
+
     base_url = "https://news.yahoo.co.jp/topics/world"
     html = requests.get(base_url)
 
     soup = BeautifulSoup(html.text, 'html.parser')
     result = {}
-    main(soup)
-    while True:
-        _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
-        if _page_ul:
-            _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
-            if _page_li and _page_li.find_all('a'):
-                _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
-                soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
-                main(soup)
+    try:
+        main(soup)
+        while True:
+            _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
+            if _page_ul:
+                _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
+                if _page_li and _page_li.find_all('a'):
+                    _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
+                    soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
+                    main(soup)
+                else:
+                    break
             else:
                 break
-        else:
-            break
+    except Exception as e:
+        logging.exception(e)
