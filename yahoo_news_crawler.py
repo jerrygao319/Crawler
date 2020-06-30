@@ -74,11 +74,14 @@ def comments_handler(comments, url):
             if page_li and page_li.find_all('a'):
                 next_href = page_li.a['href']
                 if next_href:
-                    driver.get(next_href)
-                    time.sleep(3)
-                    driver.switch_to.frame("news-cmt")
-                    comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                    _comments += comments_pagination(comment_soup, url, collection)
+                    try:
+                        driver.get(next_href)
+                        time.sleep(3)
+                        driver.switch_to.frame("news-cmt")
+                        comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                        _comments += comments_pagination(comment_soup, url, collection)
+                    except Exception as e1:
+                        logging.exception(f"current:{comment_url}next:{next_href}", e1)
                 else:
                     break
             else:
@@ -159,9 +162,12 @@ if __name__ == '__main__':
             if _page_ul:
                 _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
                 if _page_li and _page_li.find_all('a'):
-                    _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
-                    soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
-                    main(soup)
+                    if _page_li.a['href']:
+                        _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
+                        soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
+                        main(soup)
+                    else:
+                        break
                 else:
                     break
             else:
