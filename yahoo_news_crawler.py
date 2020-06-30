@@ -73,11 +73,14 @@ def comments_handler(comments, url):
             page_li = page_ul[0].find_all('li', {'class': 'next'})[0]
             if page_li and page_li.find_all('a'):
                 next_href = page_li.a['href']
-                driver.get(next_href)
-                time.sleep(3)
-                driver.switch_to.frame("news-cmt")
-                comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                _comments += comments_pagination(comment_soup, url, collection)
+                if next_href:
+                    driver.get(next_href)
+                    time.sleep(3)
+                    driver.switch_to.frame("news-cmt")
+                    comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                    _comments += comments_pagination(comment_soup, url, collection)
+                else:
+                    break
             else:
                 break
         else:
@@ -140,7 +143,7 @@ def main(news_soup):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+    logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler("yahoo_news.log", encoding="utf-8")])
 
