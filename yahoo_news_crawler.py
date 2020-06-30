@@ -63,6 +63,7 @@ def comments_handler(comments, url):
     collection = db['comments']
     comment_url = comments[0]['href']
     driver.get(comment_url)
+    driver.execute_script(js)
     time.sleep(3)
     driver.switch_to.frame("news-cmt")
     comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -76,6 +77,7 @@ def comments_handler(comments, url):
                 if next_href:
                     try:
                         driver.get(next_href)
+                        driver.execute_script(js)
                         time.sleep(3)
                         driver.switch_to.frame("news-cmt")
                         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -106,7 +108,6 @@ def main(news_soup):
                 # use selenium to load comment
                 # detail_html = requests.get(result['url'])
                 driver.get(result['url'])
-                js = "var q=document.documentElement.scrollTop=document.body.scrollHeight"
                 driver.execute_script(js)
                 time.sleep(3)
                 detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -146,6 +147,7 @@ def main(news_soup):
 
 
 if __name__ == '__main__':
+    js = "var q=document.documentElement.scrollTop=document.body.scrollHeight"
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler("yahoo_news.log", encoding="utf-8")])
