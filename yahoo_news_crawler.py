@@ -5,6 +5,7 @@ import time
 import pymongo
 from datetime import datetime
 import logging
+from selenium.common.exceptions import TimeoutException
 
 option = webdriver.ChromeOptions()
 option.add_argument("enable-automation")
@@ -15,8 +16,8 @@ option.add_argument("dns-prefetch-disable")
 option.add_argument("disable-gpu")
 
 driver = webdriver.Chrome(chrome_options=option)
-driver.set_page_load_timeout(10)
-driver.set_script_timeout(10)
+# driver.set_page_load_timeout(10)
+# driver.set_script_timeout(10)
 
 client = pymongo.MongoClient()
 db = client['yahoo_news']
@@ -82,8 +83,11 @@ def comments_handler(comments, url):
                         driver.switch_to.frame("news-cmt")
                         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
                         _comments += comments_pagination(comment_soup, url, collection)
+                    except TimeoutException as e0:
+                        logging.exception(next_href, e0)
+                        continue
                     except Exception as e1:
-                        logging.exception(f"current:{comment_url}next:{next_href}", e1)
+                        logging.exception(f"next:{next_href}", e1)
                 else:
                     break
             else:
@@ -174,5 +178,8 @@ if __name__ == '__main__':
                     break
             else:
                 break
+    except TimeoutException as e0:
+        print("time out")
+        logging.exception(e0)
     except Exception as e:
         logging.exception(e)
