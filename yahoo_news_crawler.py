@@ -81,9 +81,13 @@ def comments_handler(comments, url):
                         driver.get(next_href)
                         driver.execute_script(js)
                         time.sleep(3)
-                        driver.switch_to.frame("news-cmt")
-                        comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                        _comments += comments_pagination(comment_soup, url, collection)
+                        if driver.find_element_by_name("news-cmt"):
+                            driver.switch_to.frame("news-cmt")
+                            comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                            _comments += comments_pagination(comment_soup, url, collection)
+                        else:
+                            driver.refresh()
+                            continue
                     except TimeoutException as e0:
                         logging.exception(next_href, e0)
                         driver.refresh()
@@ -128,28 +132,31 @@ def main(news_soup):
                     if contents:
                         temp_content = ''
                         pagination = detail_soup.find_all(class_='pagination_items')
-                        driver.switch_to.frame("news-cmt")
-                        try:
-                            iframe = BeautifulSoup(driver.page_source, 'html.parser')
-                            comments = iframe.find_all('a', {'id': 'loadMoreComments'})
-                            next_temp_content = ''
-                            if pagination:
-                                next_temp_content = pagination_handler(pagination, next_temp_content)
-                            for part in contents:
-                                temp_content += part.get_text()
-                            temp_content += next_temp_content
-                            result['content'] = temp_content
-                            result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
-                            result['created_at'] = time_p
-                            # _comments = {}
-                            if comments:
-                                # result['comments'] = comments_handler(comments)
-                                result['comments'] = comments_handler(comments, result['url'])
-                            collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
-                        except Exception as e1:
-                            logging.exception(result['url'], e1)
-
+                        if driver.find_element_by_name("news-cmt"):
+                            driver.switch_to.frame("news-cmt")
+                            try:
+                                iframe = BeautifulSoup(driver.page_source, 'html.parser')
+                                comments = iframe.find_all('a', {'id': 'loadMoreComments'})
+                                next_temp_content = ''
+                                if pagination:
+                                    next_temp_content = pagination_handler(pagination, next_temp_content)
+                                for part in contents:
+                                    temp_content += part.get_text()
+                                temp_content += next_temp_content
+                                result['content'] = temp_content
+                                result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
+                                result['created_at'] = time_p
+                                # _comments = {}
+                                if comments:
+                                    # result['comments'] = comments_handler(comments)
+                                    result['comments'] = comments_handler(comments, result['url'])
+                                collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                            except Exception as e1:
+                                logging.exception(result['url'], e1)
+                        else:
+                            driver.refresh()
+                            continue
                         # with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
                         #     writer = csv.writer(f, delimiter="\t")
                         #     writer.writerow([result['url'], result['title'], result['content'], result['comments']])
