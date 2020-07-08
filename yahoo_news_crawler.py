@@ -6,6 +6,7 @@ import pymongo
 from datetime import datetime
 import logging
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchFrameException
 
 option = webdriver.ChromeOptions()
 option.add_argument("enable-automation")
@@ -85,6 +86,11 @@ def comments_handler(comments, url):
                         _comments += comments_pagination(comment_soup, url, collection)
                     except TimeoutException as e0:
                         logging.exception(next_href, e0)
+                        driver.refresh()
+                        continue
+                    except NoSuchFrameException as e2:
+                        logging.exception(next_href, e2)
+                        driver.refresh()
                         continue
                     except Exception as e1:
                         logging.exception(f"next:{next_href}", e1)
@@ -161,9 +167,9 @@ if __name__ == '__main__':
 
     soup = BeautifulSoup(html.text, 'html.parser')
     result = {}
-    try:
-        main(soup)
-        while True:
+    main(soup)
+    while True:
+        try:
             _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
             if _page_ul:
                 _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
@@ -178,8 +184,15 @@ if __name__ == '__main__':
                     break
             else:
                 break
-    except TimeoutException as e0:
-        print("time out")
-        logging.exception(e0)
-    except Exception as e:
-        logging.exception(e)
+        except TimeoutException as e0:
+            print("time out")
+            logging.exception(e0)
+            driver.refresh()
+            continue
+        except NoSuchFrameException as e2:
+            logging.exception(e2)
+            driver.refresh()
+            continue
+        except Exception as e:
+            logging.exception(e)
+            break
