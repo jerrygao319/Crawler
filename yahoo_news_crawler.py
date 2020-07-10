@@ -66,8 +66,8 @@ def comments_handler(comments, url):
     comment_url = comments[0]['href']
     driver.get(comment_url)
     driver.execute_script(js)
-    time.sleep(3)
-    driver.switch_to.frame("news-cmt")
+    time.sleep(5)
+    driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@src,'comment')]"))
     comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
     _comments = comments_pagination(comment_soup, url, collection)
     while True:
@@ -80,8 +80,8 @@ def comments_handler(comments, url):
                     try:
                         driver.get(next_href)
                         driver.execute_script(js)
-                        time.sleep(3)
-                        driver.switch_to.frame("news-cmt")
+                        time.sleep(5)
+                        driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@src,'comment')]"))
                         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
                         _comments += comments_pagination(comment_soup, url, collection)
                     except TimeoutException as e0:
@@ -119,7 +119,7 @@ def main(news_soup):
                 # detail_html = requests.get(result['url'])
                 driver.get(result['url'])
                 driver.execute_script(js)
-                time.sleep(3)
+                time.sleep(5)
                 detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
                 title = detail_soup.body.article.h1.get_text()
                 result['title'] = title
@@ -128,7 +128,7 @@ def main(news_soup):
                     if contents:
                         temp_content = ''
                         pagination = detail_soup.find_all(class_='pagination_items')
-                        driver.switch_to.frame("news-cmt")
+                        driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@src,'comment')]"))
                         try:
                             iframe = BeautifulSoup(driver.page_source, 'html.parser')
                             comments = iframe.find_all('a', {'id': 'loadMoreComments'})
