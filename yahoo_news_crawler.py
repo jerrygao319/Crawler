@@ -128,8 +128,8 @@ def main(news_soup):
                     if contents:
                         temp_content = ''
                         pagination = detail_soup.find_all(class_='pagination_items')
-                        driver.switch_to.frame('news-cmt')
                         try:
+                            driver.switch_to.frame('news-cmt')
                             iframe = BeautifulSoup(driver.page_source, 'html.parser')
                             comments = iframe.find_all('a', {'id': 'loadMoreComments'})
                             next_temp_content = ''
@@ -147,6 +147,8 @@ def main(news_soup):
                                 # result['comments'] = comments_handler(comments)
                                 result['comments'] = comments_handler(comments, result['url'])
                             collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                        except NoSuchFrameException as e2:
+                            logging.exception(result['url'], e2)
                         except Exception as e1:
                             logging.exception(result['url'], e1)
                         # with open("./yahoo_international_news.tsv", "w+", encoding="utf-8") as f:
