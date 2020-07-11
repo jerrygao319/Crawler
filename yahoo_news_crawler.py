@@ -67,7 +67,7 @@ def comments_handler(comments, url):
     driver.get(comment_url)
     driver.execute_script(js)
     time.sleep(5)
-    driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@name,'news-cmt')]"))
+    driver.switch_to.frame('news-cmt')
     comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
     _comments = comments_pagination(comment_soup, url, collection)
     while True:
@@ -81,7 +81,7 @@ def comments_handler(comments, url):
                         driver.get(next_href)
                         driver.execute_script(js)
                         time.sleep(5)
-                        driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@name,'news-cmt')]"))
+                        driver.switch_to.frame('news-cmt')
                         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
                         _comments += comments_pagination(comment_soup, url, collection)
                     except TimeoutException as e0:
@@ -128,7 +128,7 @@ def main(news_soup):
                     if contents:
                         temp_content = ''
                         pagination = detail_soup.find_all(class_='pagination_items')
-                        driver.switch_to.frame(driver.find_element_by_xpath("//iframe[contains(@name,'news-cmt')]"))
+                        driver.switch_to.frame('news-cmt')
                         try:
                             iframe = BeautifulSoup(driver.page_source, 'html.parser')
                             comments = iframe.find_all('a', {'id': 'loadMoreComments'})
