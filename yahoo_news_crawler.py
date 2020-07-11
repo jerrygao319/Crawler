@@ -148,9 +148,8 @@ def main(news_soup):
                             time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
                             result['created_at'] = time_p
                             # _comments = {}
-                            if comments:
-                                # result['comments'] = comments_handler(comments)
-                                result['comments'] = comments_handler(comments, result['url'])
+                            # result['comments'] = comments_handler(comments)
+                            result['comments'] = comments_handler(comments, result['url']) if comments else ''
                             collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                         except NoSuchFrameException as e2:
                             logging.exception(result['url'], e2)
