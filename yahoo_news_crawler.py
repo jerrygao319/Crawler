@@ -163,7 +163,7 @@ if __name__ == '__main__':
     js = "var q=document.documentElement.scrollTop=document.body.scrollHeight"
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
-                        handlers=[logging.FileHandler("yahoo_news.log", encoding="utf-8")])
+                        handlers=[logging.FileHandler("./yahoo_log/yahoo_news.log", encoding="utf-8")])
 
     base_url = "https://news.yahoo.co.jp/topics/world"
     html = requests.get(base_url)
