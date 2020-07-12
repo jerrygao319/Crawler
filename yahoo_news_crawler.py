@@ -117,46 +117,49 @@ def main(news_soup):
             news_soup = BeautifulSoup(news_page.text, 'html.parser')
             if news_soup.find_all(class_='pickupMain_detailLink'):
                 result['url'] = news_soup.find_all(class_='pickupMain_detailLink')[0].a['href']
-                # use selenium to load comment
-                # detail_html = requests.get(result['url'])
-                driver.get(result['url'])
-                driver.execute_script(js)
-                time.sleep(5)
-                detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                title = detail_soup.body.article.h1.get_text()
-                result['title'] = title
-                if title:
-                    contents = detail_soup.find_all(class_='yjDirectSLinkTarget')
-                    if contents:
-                        temp_content = ''
-                        pagination = detail_soup.find_all(class_='pagination_items')
-                        has_comments = detail_soup.find_all('iframe', {'name': 'news-cmt'})
-                        try:
-                            comments = ''
-                            if has_comments:
-                                driver.switch_to.frame('news-cmt')
-                                iframe = BeautifulSoup(driver.page_source, 'html.parser')
-                                comments = iframe.find_all('a', {'id': 'loadMoreComments'})
-                            next_temp_content = ''
-                            if pagination:
-                                next_temp_content = pagination_handler(pagination, next_temp_content)
-                            for part in contents:
-                                temp_content += part.get_text()
-                            temp_content += next_temp_content
-                            result['content'] = temp_content
-                            result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
-                            result['created_at'] = time_p
-                            # _comments = {}
-                            # result['comments'] = comments_handler(comments)
-                            print(f"start collecting comments from {result['url']}...")
-                            result['comments'] = comments_handler(comments, result['url']) if comments else ''
-                            print(f"end collecting comments from {result['url']}, total comments: {len(result['comments'])}")
-                            collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
-                        except NoSuchFrameException as e2:
-                            logging.exception(result['url'], e2)
-                        except Exception as e1:
-                            logging.exception(result['url'], e1)
+                try:
+                    # use selenium to load comment
+                    # detail_html = requests.get(result['url'])
+                    driver.get(result['url'])
+                    driver.execute_script(js)
+                    time.sleep(5)
+                    detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                    title = detail_soup.body.article.h1.get_text()
+                    result['title'] = title
+                    if title:
+                        contents = detail_soup.find_all(class_='yjDirectSLinkTarget')
+                        if contents:
+                            temp_content = ''
+                            pagination = detail_soup.find_all(class_='pagination_items')
+                            has_comments = detail_soup.find_all('iframe', {'name': 'news-cmt'})
+                            try:
+                                comments = ''
+                                if has_comments:
+                                    driver.switch_to.frame('news-cmt')
+                                    iframe = BeautifulSoup(driver.page_source, 'html.parser')
+                                    comments = iframe.find_all('a', {'id': 'loadMoreComments'})
+                                next_temp_content = ''
+                                if pagination:
+                                    next_temp_content = pagination_handler(pagination, next_temp_content)
+                                for part in contents:
+                                    temp_content += part.get_text()
+                                temp_content += next_temp_content
+                                result['content'] = temp_content
+                                result['crawled_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                time_p = detail_soup.find_all('time')[0].get_text().replace("\n", "")
+                                result['created_at'] = time_p
+                                # _comments = {}
+                                # result['comments'] = comments_handler(comments)
+                                print(f"{datetime.now().strftime('%Y-%m-%d')} start collecting comments from {result['url']}")
+                                result['comments'] = comments_handler(comments, result['url']) if comments else ''
+                                print(f"{datetime.now().strftime('%Y-%m-%d')} end collecting comments, total comments: {len(result['comments'])}")
+                                collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
+                            except NoSuchFrameException as e2:
+                                logging.exception(result['url'], e2)
+                            except Exception as e1:
+                                logging.exception(result['url'], e1)
+                except TimeoutException as e0:
+                    logging.exception(result['url'])
 
 
 if __name__ == '__main__':
