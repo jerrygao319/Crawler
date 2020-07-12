@@ -149,7 +149,9 @@ def main(news_soup):
                             result['created_at'] = time_p
                             # _comments = {}
                             # result['comments'] = comments_handler(comments)
+                            print(f"start collecting comments from {result['url']}...")
                             result['comments'] = comments_handler(comments, result['url']) if comments else ''
+                            print(f"end collecting comments from {result['url']}, total comments: {len(result['comments'])}")
                             collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                         except NoSuchFrameException as e2:
                             logging.exception(result['url'], e2)
