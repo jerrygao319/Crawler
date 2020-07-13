@@ -150,9 +150,9 @@ def main(news_soup):
                                 result['created_at'] = time_p
                                 # _comments = {}
                                 # result['comments'] = comments_handler(comments)
-                                print(f"{datetime.now().strftime('%Y-%m-%d')} start collecting comments from {result['url']}")
+                                print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} start collecting comments from {result['url']}")
                                 result['comments'] = comments_handler(comments, result['url']) if comments else ''
-                                print(f"{datetime.now().strftime('%Y-%m-%d')} end collecting comments, total comments: {len(result['comments'])}")
+                                print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} end collecting comments, total comments: {len(result['comments'])}")
                                 collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                             except NoSuchFrameException as e2:
                                 logging.exception(result['url'], e2)
