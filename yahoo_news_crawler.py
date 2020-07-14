@@ -106,7 +106,7 @@ def comments_handler(comments, url):
         return _comments
 
 
-def main(news_soup):
+def main(news_soup, result):
     collection = db['news']
     news_list = news_soup.find_all(class_='newsFeed_item')
     for news in news_list:
@@ -162,32 +162,24 @@ def main(news_soup):
                     logging.exception(result['url'])
 
 
+def main_process(base_url):
+    html = requests.get(base_url)
+
+    soup = BeautifulSoup(html.text, 'html.parser')
+    result = {}
+    main(soup, result)
+
+
 if __name__ == '__main__':
     js = "var q=document.documentElement.scrollTop=document.body.scrollHeight"
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler("./yahoo_log/yahoo_news.log", encoding="utf-8")])
 
-    base_url = "https://news.yahoo.co.jp/topics/world"
-    html = requests.get(base_url)
+    main_process("https://news.yahoo.co.jp/topics/world")
+    main_process("https://news.yahoo.co.jp/topics/world?page=2")
+    main_process("https://news.yahoo.co.jp/topics/world?page=3")
 
-    soup = BeautifulSoup(html.text, 'html.parser')
-    result = {}
-    main(soup)
-
-    base_url = "https://news.yahoo.co.jp/topics/world?page=2"
-    html = requests.get(base_url)
-
-    soup = BeautifulSoup(html.text, 'html.parser')
-    result.clear()
-    main(soup)
-
-    base_url = "https://news.yahoo.co.jp/topics/world?page=3"
-    html = requests.get(base_url)
-
-    soup = BeautifulSoup(html.text, 'html.parser')
-    result.clear()
-    main(soup)
     # while True:
     #     try:
     #         _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
