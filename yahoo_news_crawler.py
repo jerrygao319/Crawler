@@ -174,31 +174,45 @@ if __name__ == '__main__':
     soup = BeautifulSoup(html.text, 'html.parser')
     result = {}
     main(soup)
-    while True:
-        try:
-            _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
-            if _page_ul:
-                _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
-                if _page_li and _page_li.find_all('a'):
-                    if _page_li.a['href']:
-                        _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
-                        soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
-                        main(soup)
-                    else:
-                        break
-                else:
-                    break
-            else:
-                break
-        except TimeoutException as e0:
-            print("time out")
-            logging.exception(e0)
-            driver.refresh()
-            continue
-        except NoSuchFrameException as e2:
-            logging.exception(e2)
-            driver.refresh()
-            continue
-        except Exception as e:
-            logging.exception(e)
-            break
+
+    base_url = "https://news.yahoo.co.jp/topics/world?page=2"
+    html = requests.get(base_url)
+
+    soup = BeautifulSoup(html.text, 'html.parser')
+    result.clear()
+    main(soup)
+
+    base_url = "https://news.yahoo.co.jp/topics/world?page=3"
+    html = requests.get(base_url)
+
+    soup = BeautifulSoup(html.text, 'html.parser')
+    result.clear()
+    main(soup)
+    # while True:
+    #     try:
+    #         _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
+    #         if _page_ul:
+    #             _page_li = _page_ul[0].find_all('li', {'class': 'pagination_item-next'})[0]
+    #             if _page_li and _page_li.find_all('a'):
+    #                 if _page_li.a['href']:
+    #                     _next_href = "https://news.yahoo.co.jp" + _page_li.a['href']
+    #                     soup = BeautifulSoup(requests.get(_next_href).text, 'html.parser')
+    #                     main(soup)
+    #                 else:
+    #                     break
+    #             else:
+    #                 break
+    #         else:
+    #             break
+    #     except TimeoutException as e0:
+    #         print("time out")
+    #         logging.exception(e0)
+    #         driver.refresh()
+    #         continue
+    #     except NoSuchFrameException as e2:
+    #         logging.exception(e2)
+    #         driver.refresh()
+    #         continue
+    #     except Exception as e:
+    #         logging.exception(e)
+    #         break
