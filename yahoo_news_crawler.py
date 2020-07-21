@@ -92,17 +92,17 @@ def comments_handler(comments, url):
                         _comments += save_comments(comment_soup, url, collection)
                         page_li = comment_soup.find_all('li', {'class': 'next'})
                 except TimeoutException as e0:
-                    logging.exception(next_href, e0)
+                    logger.exception(next_href, e0)
                     driver.refresh()
                     wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
                     continue
                 except NoSuchFrameException as e2:
-                    logging.exception(next_href, e2)
+                    logger.exception(next_href, e2)
                     driver.refresh()
                     wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
                     continue
                 except Exception as e1:
-                    logging.exception(f"next:{next_href}", e1)
+                    logger.exception(f"next:{next_href}", e1)
             else:
                 break
 
@@ -192,11 +192,11 @@ def main(news_soup, result):
                                 print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} end collecting comments, total comments: {len(result['comments'])}")
                                 collection.update_one({'url': result['url']}, {'$set': result}, upsert=True)
                             except NoSuchFrameException as e2:
-                                logging.exception(result['url'], e2)
+                                logger.exception(result['url'], e2)
                             except Exception as e1:
-                                logging.exception(result['url'], e1)
+                                logger.exception(result['url'], e1)
                 except TimeoutException as e0:
-                    logging.exception(result['url'])
+                    logger.exception(result['url'])
 
 
 def main_process(base_url):
@@ -212,6 +212,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.ERROR, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler("./yahoo_log/yahoo_news.log", encoding="utf-8")])
+    logger = logging.getLogger(__name__)
 
     main_process("https://news.yahoo.co.jp/topics/world")
     main_process("https://news.yahoo.co.jp/topics/world?page=2")
