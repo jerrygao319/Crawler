@@ -5,6 +5,9 @@ import time
 import pymongo
 from datetime import datetime
 import logging
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchFrameException
 
@@ -23,6 +26,8 @@ driver = webdriver.Chrome(options=option)
 client = pymongo.MongoClient()
 db = client['yahoo_news']
 
+wait = WebDriverWait(driver, 30)
+
 
 def pagination_handler(pagination, t_content):
     page_url = []
@@ -38,7 +43,7 @@ def pagination_handler(pagination, t_content):
     return t_content
 
 
-def comments_pagination(comment_soup, url, collection):
+def save_comments(comment_soup, url, collection):
     comments = []
     comment_list = comment_soup.find_all(class_='commentListItem')
     for comment_item in comment_list:
@@ -65,43 +70,72 @@ def comments_handler(comments, url):
     collection = db['comments']
     comment_url = comments[0]['href']
     driver.get(comment_url)
+    wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
     driver.execute_script(js)
-    time.sleep(5)
+    time.sleep(3)
     if BeautifulSoup(driver.page_source, 'html.parser').find_all('iframe', {'name': 'news-cmt'}):
         driver.switch_to.frame('news-cmt')
         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-        _comments = comments_pagination(comment_soup, url, collection)
-        while True:
-            page_ul = comment_soup.find_all('ul', {'class': 'pagenation'})
-            if page_ul:
-                page_li = page_ul[0].find_all('li', {'class': 'next'})[0]
-                if page_li and page_li.find_all('a'):
-                    next_href = page_li.a['href']
-                    if next_href:
-                        try:
-                            driver.get(next_href)
-                            driver.execute_script(js)
-                            time.sleep(5)
-                            if BeautifulSoup(driver.page_source, 'html.parser').find_all('iframe', {'name': 'news-cmt'}):
-                                driver.switch_to.frame('news-cmt')
-                                comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
-                                _comments += comments_pagination(comment_soup, url, collection)
-                        except TimeoutException as e0:
-                            logging.exception(next_href, e0)
-                            driver.refresh()
-                            continue
-                        except NoSuchFrameException as e2:
-                            logging.exception(next_href, e2)
-                            driver.refresh()
-                            continue
-                        except Exception as e1:
-                            logging.exception(f"next:{next_href}", e1)
-                    else:
-                        break
-                else:
-                    break
+        _comments = save_comments(comment_soup, url, collection)
+        page_li = comment_soup.find_all('li', {'class': 'next'})
+        while page_li and page_li[0].find_all('a'):
+            next_href = page_li[0].a['href']
+            if next_href:
+                try:
+                    driver.get(next_href)
+                    wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
+                    driver.execute_script(js)
+                    time.sleep(3)
+                    if BeautifulSoup(driver.page_source, 'html.parser').find_all('iframe', {'name': 'news-cmt'}):
+                        driver.switch_to.frame('news-cmt')
+                        comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                        _comments += save_comments(comment_soup, url, collection)
+                        page_li = comment_soup.find_all('li', {'class': 'next'})
+                except TimeoutException as e0:
+                    logging.exception(next_href, e0)
+                    driver.refresh()
+                    continue
+                except NoSuchFrameException as e2:
+                    logging.exception(next_href, e2)
+                    driver.refresh()
+                    continue
+                except Exception as e1:
+                    logging.exception(f"next:{next_href}", e1)
             else:
                 break
+
+        # while True:
+        #     page_ul = comment_soup.find_all('ul', {'class': 'pagenation'})
+        #     if page_ul:
+        #         page_li = page_ul[0].find_all('li', {'class': 'next'})[0]
+        #         if page_li and page_li.find_all('a'):
+        #             next_href = page_li.a['href']
+        #             if next_href:
+        #                 try:
+        #                     driver.get(next_href)
+        #                     wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
+        #                     driver.execute_script(js)
+        #                     time.sleep(5)
+        #                     if BeautifulSoup(driver.page_source, 'html.parser').find_all('iframe', {'name': 'news-cmt'}):
+        #                         driver.switch_to.frame('news-cmt')
+        #                         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
+        #                         _comments += save_comments(comment_soup, url, collection)
+        #                 except TimeoutException as e0:
+        #                     logging.exception(next_href, e0)
+        #                     driver.refresh()
+        #                     continue
+        #                 except NoSuchFrameException as e2:
+        #                     logging.exception(next_href, e2)
+        #                     driver.refresh()
+        #                     continue
+        #                 except Exception as e1:
+        #                     logging.exception(f"next:{next_href}", e1)
+        #             else:
+        #                 break
+        #         else:
+        #             break
+        #     else:
+        #         break
     # collection.insert_many(comments)
         return _comments
 
@@ -121,6 +155,7 @@ def main(news_soup, result):
                     # use selenium to load comment
                     # detail_html = requests.get(result['url'])
                     driver.get(result['url'])
+                    wait.until(EC.title_contains('Yahoo!ニュース'))
                     driver.execute_script(js)
                     time.sleep(5)
                     detail_soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -180,6 +215,7 @@ if __name__ == '__main__':
     main_process("https://news.yahoo.co.jp/topics/world?page=2")
     main_process("https://news.yahoo.co.jp/topics/world?page=3")
 
+    driver.close()
     # while True:
     #     try:
     #         _page_ul = soup.find_all('ul', {'class': 'pagination_items'})
