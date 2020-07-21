@@ -94,10 +94,12 @@ def comments_handler(comments, url):
                 except TimeoutException as e0:
                     logging.exception(next_href, e0)
                     driver.refresh()
+                    wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
                     continue
                 except NoSuchFrameException as e2:
                     logging.exception(next_href, e2)
                     driver.refresh()
+                    wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
                     continue
                 except Exception as e1:
                     logging.exception(f"next:{next_href}", e1)
