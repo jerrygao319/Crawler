@@ -214,9 +214,10 @@ if __name__ == '__main__':
                         handlers=[logging.FileHandler("./yahoo_log/yahoo_news.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
 
-    main_process("https://news.yahoo.co.jp/topics/world")
-    main_process("https://news.yahoo.co.jp/topics/world?page=2")
     main_process("https://news.yahoo.co.jp/topics/world?page=3")
+    main_process("https://news.yahoo.co.jp/topics/world?page=2")
+    main_process("https://news.yahoo.co.jp/topics/world")
+
 
     driver.close()
     # while True:
