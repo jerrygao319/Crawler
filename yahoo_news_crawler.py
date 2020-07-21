@@ -93,7 +93,7 @@ def comments_handler(comments, url):
                         page_li = comment_soup.find_all('li', {'class': 'next'})
                 except TimeoutException as e0:
                     logger.exception(next_href, e0)
-                    driver.refresh()
+                    driver.get(next_href)
                     wait.until(EC.presence_of_element_located((By.NAME, 'news-cmt')))
                     continue
                 except NoSuchFrameException as e2:
