@@ -12,12 +12,19 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchFrameException
 
 option = webdriver.ChromeOptions()
+# When set to none Selenium WebDriver only waits until the initial page is downloaded.
+option.page_load_strategy = 'none'
 option.add_argument("enable-automation")
-option.add_argument("headless")
-option.add_argument("no-sandbox")
-option.add_argument("disable-extensions")
-option.add_argument("dns-prefetch-disable")
-option.add_argument("disable-gpu")
+option.add_argument("--headless")
+option.add_argument("--no-sandbox")
+option.add_argument("--disable-extensions")
+option.add_argument("--dns-prefetch-disable")
+option.add_argument("--disable-gpu")
+option.add_argument('--disable-dev-shm-usage')
+option.add_argument('start-maximize')
+option.add_argument('--disable-browser-side-navigation')
+option.add_argument('--disable-infobars')
+
 
 driver = webdriver.Chrome(options=option)
 # driver.set_page_load_timeout(10)
