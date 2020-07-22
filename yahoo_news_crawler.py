@@ -81,7 +81,7 @@ def comments_handler(comments, url, driver, wait):
         comment_soup = BeautifulSoup(driver.page_source, 'html.parser')
         _comments = save_comments(comment_soup, url, collection)
         page_li = comment_soup.find_all('li', {'class': 'next'})
-        count = 0
+        count = 1
         while page_li and page_li[0].find_all('a'):
             if count >= 10:
                 driver.quit()
