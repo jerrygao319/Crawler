@@ -222,11 +222,12 @@ if __name__ == '__main__':
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler("./yahoo_log/yahoo_news.log", encoding="utf-8")])
     logger = logging.getLogger(__name__)
+    base_url = 'https://news.yahoo.co.jp/topics/world'
 
     try:
-        main_process("https://news.yahoo.co.jp/topics/world?page=3")
-        main_process("https://news.yahoo.co.jp/topics/world?page=2")
-        main_process("https://news.yahoo.co.jp/topics/world")
+        main_process(base_url + '?page=3')
+        main_process(base_url + '?page=2')
+        main_process(base_url)
     finally:
         driver.close()
 
