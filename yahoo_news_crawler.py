@@ -225,9 +225,9 @@ if __name__ == '__main__':
     base_url = 'https://news.yahoo.co.jp/topics/world'
 
     try:
-        main_process(base_url + '?page=3')
-        main_process(base_url + '?page=2')
         main_process(base_url)
+        main_process(base_url + '?page=2')
+        main_process(base_url + '?page=3')
     finally:
         driver.close()
 
