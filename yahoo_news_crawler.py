@@ -196,7 +196,9 @@ def main(news_soup, result):
                             except Exception as e1:
                                 logger.exception(result['url'], e1)
                 except TimeoutException as e0:
-                    logger.exception(result['url'])
+                    logger.exception(result['url'], e0)
+                    driver.get(result['url'])
+                    wait.until(EC.title_contains('Yahoo!ニュース'))
 
 
 def main_process(base_url):
