@@ -87,6 +87,7 @@ def comments_handler(comments, url, driver, wait):
                 driver.quit()
                 driver = webdriver.Chrome(options=option)
                 wait = WebDriverWait(driver, 30)
+                count = 1
             next_href = page_li[0].a['href']
             if next_href:
                 try:
