@@ -206,6 +206,8 @@ def main(news_soup, result):
                     logger.exception(result['url'], e0)
                     driver.get(result['url'])
                     wait.until(EC.title_contains('Yahoo!ニュース'))
+                except Exception as e:
+                    logger.exception(result['url'], e)
 
 
 def main_process(base_url):
