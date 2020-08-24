@@ -8,8 +8,7 @@ import logging
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchFrameException
+from selenium.common.exceptions import TimeoutException, NoSuchFrameException
 
 option = webdriver.ChromeOptions()
 # When set to none Selenium WebDriver only waits until the initial page is downloaded.
